@@ -1,3 +1,14 @@
 theme: jekyll-theme-minimal
 title: Title
 description: To Be Revealed
+---
+layout: default
+title: Home
+---
+
+Welcome to my new website. Here are a few things I do:
+* Math
+* Engineering
+* Coding
+
+This website is still being built as I learn how to utilize Github and Git. 
