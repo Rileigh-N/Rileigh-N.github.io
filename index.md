@@ -6,9 +6,7 @@ title: Home
 
 # Welcome!
 
-![Do not cite the deep magic to me. I was there when it was written](me.png)
-
 <figure align="center">
-  <img src="me.png" alt="Do not cite the deep magic to me. I was there when it was written" width="300" style="border-radius: 8px;">
+  <img src="me.png" alt="Do not cite the deep magic to me. I was there when it was written" width="600" style="border-radius: 8px;">
   <figcaption><em> Making sure I would have 12 years of experience for my first job! </em></figcaption>
 </figure>
