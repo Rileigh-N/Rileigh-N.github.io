@@ -5,6 +5,7 @@ description: To Be Revealed
 layout: default
 title: Home
 ---
+{% include nav.html %}
 
 Welcome to my new website. Here are a few things I do:
 * Math
