@@ -7,9 +7,4 @@ title: Home
 ---
 {% include nav.html %}
 
-Welcome to my new website. Here are a few things I do:
-* Math
-* Engineering
-* Coding
-
-This website is still being built as I learn how to utilize Github and Git. 
+Welcome to my new website. This website is still being built as I learn how to utilize Github and Git. 
