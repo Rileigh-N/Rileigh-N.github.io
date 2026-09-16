@@ -1,10 +1,9 @@
 ---
 layout: default
-title: Projects
+title: Home
 ---
 {% include nav.html %}
 
-# My Projects
+# Welcome!
 
-Here is a list of things I have built:
-* TBD
+This website is still being built as I learn how to utilize GitHub and Git.
