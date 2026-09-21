@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assembly Calculator</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    label { display: inline-block; width: 130px; font-weight: 500; }
+    input, select { padding: 6px; margin-bottom: 12px; }
+    button { padding: 8px 16px; font-weight: bold; cursor: pointer; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+  <h2>Assembly Calculator UI</h2>
+
+  <label for="val1">First Value:</label>
+  <input type="number" id="val1" value="12">
+  <br>
+
+  <label for="val2">Second Value:</label>
+  <input type="number" id="val2" value="4">
+  <br>
+
+  <label for="op">Operation:</label>
+  <select id="op">
+    <option value="add">+</option>
+    <option value="sub">-</option>
+    <option value="mul">*</option>
+    <option value="div">/</option>
+  </select>
+  <br><br>
+
+  <button id="calc-btn" onclick="runAssemblyCalculation()">Run Assembly</button>
+
+  <h3>Result: <span id="result">-</span></h3>
+
+  <hr>
+
+  <h3>Source Code (<span id="source-name">code.wat</span>)</h3>
+  <pre><code id="asm-view">Loading assembly source...</code></pre>
+
+  <script>
+    let wasmExports = null;
+
+    // 1. Fetch and instantiate the compiled WebAssembly binary
+    WebAssembly.instantiateStreaming(fetch('code.wasm'))
+      .then(obj => {
+        wasmExports = obj.instance.exports;
+        console.log("Assembly binary loaded successfully!");
+      })
+      .catch(err => {
+        document.getElementById('result').innerText = "WASM load error: " + err.message;
+      });
+
+    // 2. Fetch the text version to display in your UI
+    fetch('code.wat')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('asm-view').textContent = data;
+      })
+      .catch(() => {
+        document.getElementById('asm-view').textContent = "Could not load source text.";
+      });
+
+    // 3. Trigger assembly execution when clicking 'Run'
+    function runAssemblyCalculation() {
+      if (!wasmExports) {
+        alert("Assembly binary has not finished loading yet!");
+        return;
+      }
+
+      const a = parseFloat(document.getElementById('val1').value);
+      const b = parseFloat(document.getElementById('val2').value);
+      const op = document.getElementById('op').value;
+
+      let answer;
+
+      // Execute the corresponding exported assembly function
+      if (op === 'add') answer = wasmExports.add(a, b);
+      else if (op === 'sub') answer = wasmExports.sub(a, b);
+      else if (op === 'mul') answer = wasmExports.mul(a, b);
+      else if (op === 'div') {
+        if (b === 0) {
+          document.getElementById('result').innerText = "Division by zero!";
+          return;
+        }
+        answer = wasmExports.div(a, b);
+      }
+
+      document.getElementById('result').innerText = answer;
+    }
+  </script>
+</body>
+</html>
