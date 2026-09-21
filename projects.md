@@ -7,4 +7,4 @@ title: Projects
 # My Projects
 
 Here is a list of things I have built:
-* TBD
+* [Try My PyScript Calculator](./PlateCalculator/)
