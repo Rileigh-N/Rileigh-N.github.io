@@ -5,7 +5,7 @@ title: Home
 {% include nav.html %}
 
 # Howdy
-This is a fun project for me to learn how to utilize GitHub + Git! My background: MSCE Student with a BS in Applied Math and a concentration in Computer Science.
+MSCE Student with a BS in Applied Math w/ a concentration in Computer Science. Motivated by a passion for modeling and analyzing complex systems, with a commitment to advancing infrastructure solutions. Hoping to use this space to practice finding engineering solutions via my mathematical background. 
 
 <figure align="center">
   <img src="me.png" alt="Do not cite the deep magic to me. I was there when it was written" width="600" style="border-radius: 8px;">
