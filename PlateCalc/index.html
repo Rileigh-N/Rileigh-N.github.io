@@ -21,7 +21,7 @@
 
   <!-- The Central Rectangle -->
   <rect x="70" y="50" width="280" height="160" rx="8" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
-  <text x="210" y="135" text-anchor="middle" fill="#ffffff" font-size="14">Rectangle</text>
+  <text x="210" y="135" text-anchor="middle" fill="#ffffff" font-size="14">Plate/Slab Geometry</text>
 
   <!-- Right Label -->
   <text x="385" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold" transform="rotate(90 385 145)">a1</text>
@@ -30,19 +30,101 @@
   <text x="210" y="245" text-anchor="middle" fill="#818cf8" font-weight="bold">b0</text>
 </svg>
 
-<p>Support Conditions: Enter 0 for free/ no support, 1 for simply supported/pinned, and 2 for fixed</p>
-<label>Support Condition at a0:</label>
-<input type="number" id="a0" value="0">
-<br><br>
-<label>Support Condition at a1:</label>
-<input type="number" id="a1" value="0">
-<br><br>
-<label>Support Condition at b0:</label>
-<input type="number" id="b0" value="0">
-<br><br>
-<label>Support Condition at b1:</label>
-<input type="number" id="b1" value="0">
-<br><br>
+  <fieldset>
+  <legend>Support Condition at a0:</legend>
+  <div>
+    <input
+      type="radio"
+      id="a0Free"
+      name="a0"
+      value="0"
+      checked />
+    <label for="a0Free">Free</label>
+
+    <input type="radio" id="a0SS" name="a0" value="1" />
+    <label for="a0SS">simply supported</label>
+
+    <input
+      type="radio"
+      id="a0fixed"
+      name="a0"
+      value="2"
+      disabled />
+    <label for="a0fixed">fixed</label>
+  </div>
+</fieldset>
+
+<fieldset>
+<legend>Support Condition at a1:</legend>
+  <div>
+    <input
+      type="radio"
+      id="a1Free"
+      name="a1"
+      value="0"
+      checked />
+    <label for="a1Free">Free</label>
+
+    <input type="radio" id="a1SS" name="a1" value="1" />
+    <label for="a1SS">simply supported</label>
+
+    <input
+      type="radio"
+      id="a1fixed"
+      name="a1"
+      value="2"
+      disabled />
+    <label for="a1fixed">fixed</label>
+  </div>
+</fieldset>
+
+  <fieldset>
+  <legend>Support Condition at b0:</legend>
+  <div>
+    <input
+      type="radio"
+      id="b0Free"
+      name="b0"
+      value="0"
+      checked />
+    <label for="b0Free">Free</label>
+
+    <input type="radio" id="b0SS" name="b0" value="1" />
+    <label for="b0SS">simply supported</label>
+
+    <input
+      type="radio"
+      id="b0fixed"
+      name="b0"
+      value="2"
+      disabled />
+    <label for="b0fixed">fixed</label>
+  </div>
+</fieldset>
+
+  <fieldset>
+  <legend>Support Condition at b1:</legend>
+  <div>
+    <input
+      type="radio"
+      id="b1Free"
+      name="b1"
+      value="0"
+      checked />
+    <label for="b1Free">Free</label>
+
+    <input type="radio" id="b1SS" name="b1" value="1" />
+    <label for="b1SS">simply supported</label>
+
+    <input
+      type="radio"
+      id="b1fixed"
+      name="b1"
+      value="2"
+      disabled />
+    <label for="b1fixed">fixed</label>
+  </div>
+</fieldset>
 
 <p>Geometry of Plate</p>
 <label>Length (in) (a1-a0)</label>
