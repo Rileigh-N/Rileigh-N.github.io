@@ -7,4 +7,4 @@ title: Projects
 # My Projects
 
 Here is a list of things I have built:
-* [Try My PyScript Calculator](./PlateCalc/)
+* [Plate Deflection and Stress Calculator](./PlateCalc/)
