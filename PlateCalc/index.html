@@ -17,19 +17,22 @@
   <text x="210" y="32" text-anchor="middle" fill="#818cf8" font-weight="bold">b1</text>
 
   <!-- Left Label -->
-  <text x="35" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold" transform="rotate(-90 35 145)">a0</text>
+  <text x="35" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a0</text>
 
   <!-- The Central Rectangle -->
-  <rect x="70" y="50" width="280" height="160" rx="8" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
-  <text x="210" y="135" text-anchor="middle" fill="#ffffff" font-size="14">Plate/Slab Geometry</text>
+  <rect x="70" y="50" width="280" height="160" rx="0" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
+  <text x="210" y="135" text-anchor="middle" fill="#ffffff" font-size="14">Plate Geometry</text>
 
   <!-- Right Label -->
-  <text x="385" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold" transform="rotate(90 385 145)">a1</text>
+  <text x="385" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a1</text>
 
   <!-- Bottom Label -->
   <text x="210" y="245" text-anchor="middle" fill="#818cf8" font-weight="bold">b0</text>
 </svg>
 
+  <p>
+    Please follow prompts to enter relevant information. This calculator is still in it's infancy and can only handle rectangular plates with supported edges and a uniformly distributed load across the entire area of the slab.
+  </p>
   <fieldset>
   <legend>Support Condition at a0:</legend>
   <div>
@@ -42,7 +45,7 @@
     <label for="a0Free">Free</label>
 
     <input type="radio" id="a0SS" name="a0" value="1" />
-    <label for="a0SS">simply supported</label>
+    <label for="a0SS">Simply Supported</label>
 
     <input
       type="radio"
@@ -50,7 +53,7 @@
       name="a0"
       value="2"
       disabled />
-    <label for="a0fixed">fixed</label>
+    <label for="a0fixed">Fixed</label>
   </div>
 </fieldset>
 
@@ -66,7 +69,7 @@
     <label for="a1Free">Free</label>
 
     <input type="radio" id="a1SS" name="a1" value="1" />
-    <label for="a1SS">simply supported</label>
+    <label for="a1SS">Simply Supported</label>
 
     <input
       type="radio"
@@ -74,7 +77,7 @@
       name="a1"
       value="2"
       disabled />
-    <label for="a1fixed">fixed</label>
+    <label for="a1fixed">Fixed</label>
   </div>
 </fieldset>
 
@@ -90,7 +93,7 @@
     <label for="b0Free">Free</label>
 
     <input type="radio" id="b0SS" name="b0" value="1" />
-    <label for="b0SS">simply supported</label>
+    <label for="b0SS">Simply Supported</label>
 
     <input
       type="radio"
@@ -98,7 +101,7 @@
       name="b0"
       value="2"
       disabled />
-    <label for="b0fixed">fixed</label>
+    <label for="b0fixed">Fixed</label>
   </div>
 </fieldset>
 
@@ -114,7 +117,7 @@
     <label for="b1Free">Free</label>
 
     <input type="radio" id="b1SS" name="b1" value="1" />
-    <label for="b1SS">simply supported</label>
+    <label for="b1SS">Simply Supported</label>
 
     <input
       type="radio"
@@ -122,15 +125,15 @@
       name="b1"
       value="2"
       disabled />
-    <label for="b1fixed">fixed</label>
+    <label for="b1fixed">Fixed</label>
   </div>
 </fieldset>
 
 <p>Geometry of Plate</p>
-<label>Length (in) (a1-a0)</label>
+<label>Length (in) [distance between a0 and a1] </label>
 <input type="number" id="length" value="0">
 <br><br>
-<label>Width (in) (b1-b0):</label>
+<label>Width (in) [distance between b0 and b1]</label>
 <input type="number" id="width" value="0">
 <br><br>
 <label>Thickness (in):</label>
@@ -138,10 +141,10 @@
 <br><br>
 
 <p>Loading + Material Conditions</p>
-<label>UDL (psi):</label>
+<label>Loading (psi):</label>
 <input type="number" id="q" value="0">
 <br><br>
-<label>E (psi):</label>
+<label>Modulus of Elasticity (psi):</label>
 <input type="number" id="E" value="0">
 <br><br>
 <label>Poisson's Ratio:</label>
@@ -163,9 +166,9 @@ import sympy as sp
 def calculate_answer(event):
     document.querySelector("#output-box").innerText = "Calculating... Please wait."
 
-    # Grid terms: M=2, N=2 keeps browser integration fast
+    # Grid terms: M=4, N=4
     x, y = sp.symbols('x y', real=True)
-    M, N = 2, 2
+    M, N = 4, 4
 
     # Support conditions read dynamically when clicked
     a0 = float(document.querySelector("#a0").value)
