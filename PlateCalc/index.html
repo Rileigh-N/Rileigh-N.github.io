@@ -8,12 +8,10 @@ def calculate_answer(event):
     out.innerText = "Calculating... Please wait."
 
     try:
-        # Corrected radio button queries
-        a0 = int(document.querySelector("input[name='a0']:checked").value)
-        a1 = int(document.querySelector("input[name='a1']:checked").value)
-        b0 = int(document.querySelector("input[name='b0']:checked").value)
-        b1 = int(document.querySelector("input[name='b1']:checked").value)
-
+        a0 = float(document.querySelector("input[name='a0']:checked").value)
+        a1 = float(document.querySelector("input[name='a1']:checked").value)
+        b0 = float(document.querySelector("input[name='b0']:checked").value)
+        b1 = float(document.querySelector("input[name='b1']:checked").value)
         # Geometry & material inputs
         h = float(document.querySelector("#thickness").value)
         l = float(document.querySelector("#length").value)
