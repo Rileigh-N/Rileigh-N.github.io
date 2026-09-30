@@ -1,89 +1,378 @@
-<script type="py">
-from pyscript import document
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rectangular Plate Bending Calculator</title>
+  <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+  <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+
+  <py-config>
+    packages = ["numpy"]
+  </py-config>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 680px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      line-height: 1.5;
+      color: #1e293b;
+    }
+    fieldset {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+    }
+    legend {
+      font-weight: 600;
+      color: #334155;
+    }
+    .input-group {
+      margin-bottom: 0.75rem;
+    }
+    label {
+      display: inline-block;
+      min-width: 280px;
+      font-weight: 500;
+    }
+    input[type="number"] {
+      width: 100px;
+      padding: 4px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    #output-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <svg width="420" height="280" viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
+    <!-- Top Label -->
+    <text x="210" y="32" text-anchor="middle" fill="#818cf8" font-weight="bold">b1 (y = d)</text>
+
+    <!-- Left Label -->
+    <text x="35" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a0 (x = 0)</text>
+
+    <!-- The Central Rectangle -->
+    <rect x="70" y="50" width="280" height="160" rx="0" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
+    <text x="210" y="135" text-anchor="middle" fill="#ffffff" font-size="14">Plate Geometry</text>
+
+    <!-- Right Label -->
+    <text x="385" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a1 (x = l)</text>
+
+    <!-- Bottom Label -->
+    <text x="210" y="245" text-anchor="middle" fill="#818cf8" font-weight="bold">b0 (y = 0)</text>
+  </svg>
+
+  <p>
+    Rectangular plate bending analysis under a uniform transverse load ($q$) using the Ritz method.
+  </p>
+
+  <fieldset>
+    <legend>Support Condition at a0 (x = 0):</legend>
+    <label><input type="radio" name="a0" value="0"> Free</label>
+    <label><input type="radio" name="a0" value="1" checked> Simply Supported</label>
+    <label><input type="radio" name="a0" value="2"> Fixed</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Support Condition at a1 (x = l):</legend>
+    <label><input type="radio" name="a1" value="0"> Free</label>
+    <label><input type="radio" name="a1" value="1" checked> Simply Supported</label>
+    <label><input type="radio" name="a1" value="2"> Fixed</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Support Condition at b0 (y = 0):</legend>
+    <label><input type="radio" name="b0" value="0"> Free</label>
+    <label><input type="radio" name="b0" value="1" checked> Simply Supported</label>
+    <label><input type="radio" name="b0" value="2"> Fixed</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Support Condition at b1 (y = d):</legend>
+    <label><input type="radio" name="b1" value="0"> Free</label>
+    <label><input type="radio" name="b1" value="1" checked> Simply Supported</label>
+    <label><input type="radio" name="b1" value="2"> Fixed</label>
+  </fieldset>
+
+  <h3>Geometry</h3>
+  <div class="input-group">
+    <label for="length">Length $l$ (in) [distance a0 to a1]:</label>
+    <input type="number" id="length" value="20" step="any">
+  </div>
+  <div class="input-group">
+    <label for="width">Width $d$ (in) [distance b0 to b1]:</label>
+    <input type="number" id="width" value="10" step="any">
+  </div>
+  <div class="input-group">
+    <label for="thickness">Thickness $h$ (in):</label>
+    <input type="number" id="thickness" value="0.25" step="any">
+  </div>
+
+  <h3>Loading & Material Properties</h3>
+  <div class="input-group">
+    <label for="q">Uniform Load $q$ (psi):</label>
+    <input type="number" id="q" value="5" step="any">
+  </div>
+  <div class="input-group">
+    <label for="E">Modulus of Elasticity $E$ (psi):</label>
+    <input type="number" id="E" value="30000000" step="any">
+  </div>
+  <div class="input-group">
+    <label for="v">Poisson's Ratio $\nu$:</label>
+    <input type="number" id="v" value="0.3" step="any">
+  </div>
+
+  <br>
+  <button py-click="calculate_answer">Calculate</button>
+
+  <h2>Result:</h2>
+  <div id="output-box">Ready to compute. Enter values and click Calculate.</div>
+
+  <script type="py">
+from js import document
 import numpy as np
-import sympy as sp
+
+def get_input_val(selector, desc):
+    el = document.querySelector(selector)
+    if el is None:
+        raise ValueError(f"Missing DOM element: {selector} ({desc})")
+    val_str = str(el.value).strip()
+    if not val_str:
+        raise ValueError(f"Empty value for: {desc}")
+    return float(val_str)
 
 def calculate_answer(event):
     out = document.querySelector("#output-box")
     out.innerText = "Calculating... Please wait."
 
     try:
-        a0 = float(document.querySelector("input[name='a0']:checked").value)
-        a1 = float(document.querySelector("input[name='a1']:checked").value)
-        b0 = float(document.querySelector("input[name='b0']:checked").value)
-        b1 = float(document.querySelector("input[name='b1']:checked").value)
-        # Geometry & material inputs
-        h = float(document.querySelector("#thickness").value)
-        l = float(document.querySelector("#length").value)
-        d = float(document.querySelector("#width").value)
-        Y = float(document.querySelector("#E").value)
-        v = float(document.querySelector("#v").value)
-        q = float(document.querySelector("#q").value)
+        a0 = int(get_input_val("input[name='a0']:checked", "Support a0"))
+        a1 = int(get_input_val("input[name='a1']:checked", "Support a1"))
+        b0 = int(get_input_val("input[name='b0']:checked", "Support b0"))
+        b1 = int(get_input_val("input[name='b1']:checked", "Support b1"))
+
+        l = get_input_val("#length", "Length")
+        d = get_input_val("#width", "Width")
+        h = get_input_val("#thickness", "Thickness")
+        q = get_input_val("#q", "Load q")
+        E = get_input_val("#E", "Young's Modulus")
+        v = get_input_val("#v", "Poisson's Ratio")
     except Exception as err:
         out.innerText = f"Input Error: {err}"
         return
 
-    if l <= 0 or d <= 0 or h <= 0 or Y <= 0 or (1 - v**2) == 0:
-        out.innerText = "Please enter valid, non-zero values for Length, Width, Thickness, and E."
+    if l <= 0 or d <= 0 or h <= 0 or E <= 0 or (1.0 - v**2) <= 0:
+        out.innerText = "Error: Length, Width, Thickness, and E must be strictly positive, and 0 <= Poisson's ratio < 1."
         return
 
-    # Use smaller grid for fast in-browser symbolic integration (M=3, N=3)
-    M, N = 3, 3
-    x, y = sp.symbols('x y', real=True)
-    D = Y * h**3 / (12 * (1 - v**2))
+    # Check for rigid body instability (at least one boundary condition required)
+    if (a0 + a1 + b0 + b1) == 0:
+        out.innerText = "Error: Unconstrained plate (all edges free). Rigid-body motion occurs."
+        return
 
-    def X(i, x, l):
-        return (x/l)**a0 * (1 - x/l)**a1 * (x/l)**i
+    # Plate bending rigidity
+    D = E * (h**3) / (12.0 * (1.0 - v**2))
 
-    def Y_fn(j, y, d):
-        return (y/d)**b0 * (1 - y/d)**b1 * (y/d)**j
+    # Ritz Series Expansion orders (M x N terms)
+    M, N = 4, 4
+    num_modes = M * N
 
-    phi = [X(i, x, l) * Y_fn(j, y, d) for i in range(1, M + 1) for j in range(1, N + 1)]
-    c = sp.symbols(f'c0:{M*N}')
-    w = sum(ci * p for ci, p in zip(c, phi))
+    # Normalized 1D basis polynomials:
+    # X_i(xi) = xi^(a0 + i) * (1 - xi)^a1, where xi = x / l in [0, 1]
+    def eval_basis_1d(deg_0, deg_1, idx, s):
+        p0 = deg_0 + idx
+        p1 = deg_1
+        
+        # phi(s) = s^p0 * (1-s)^p1
+        phi = (s**p0) * ((1.0 - s)**p1)
+        
+        # dphi/ds
+        dphi = np.zeros_like(s)
+        if p0 > 0:
+            dphi += p0 * (s**(p0 - 1)) * ((1.0 - s)**p1)
+        if p1 > 0:
+            dphi -= p1 * (s**p0) * ((1.0 - s)**(p1 - 1))
+            
+        # d2phi/ds2
+        d2phi = np.zeros_like(s)
+        if p0 >= 2:
+            d2phi += p0 * (p0 - 1) * (s**(p0 - 2)) * ((1.0 - s)**p1)
+        if p0 >= 1 and p1 >= 1:
+            d2phi -= 2.0 * p0 * p1 * (s**(p0 - 1)) * ((1.0 - s)**(p1 - 1))
+        if p1 >= 2:
+            d2phi += p1 * (p1 - 1) * (s**p0) * ((1.0 - s)**(p1 - 2))
+            
+        return phi, dphi, d2phi
 
-    w_xx = sp.diff(w, x, 2)
-    w_yy = sp.diff(w, y, 2)
-    w_xy = sp.diff(w, x, y)
+    # Precompute basis evaluations using Gauss-Legendre quadrature (N_gp = 16)
+    n_gp = 16
+    xi_g, w_xi = np.polynomial.legendre.leggauss(n_gp)
+    eta_g, w_eta = np.polynomial.legendre.leggauss(n_gp)
 
-    U = (D / 2) * sp.integrate((w_xx + w_yy)**2 - 2*(1 - v)*(w_xx*w_yy - w_xy**2), (x, 0, l), (y, 0, d))
-    V = -sp.integrate(q * w, (x, 0, l), (y, 0, d))
+    # Map Gauss points from [-1, 1] to [0, 1]
+    xi_pts = 0.5 * (xi_g + 1.0)
+    w_xi = 0.5 * w_xi
+    eta_pts = 0.5 * (eta_g + 1.0)
+    w_eta = 0.5 * w_eta
 
-    eqns = [sp.diff(U + V, ci) for ci in c]
-    sol = sp.solve(eqns, c, dict=True)[0]
-    w_sol = w.subs(sol)
+    # Pre-evaluate X and Y modes at quadrature points
+    X_vals = np.zeros((M, n_gp))
+    dX_vals = np.zeros((M, n_gp))
+    ddX_vals = np.zeros((M, n_gp))
+    for i in range(M):
+        p, dp, ddp = eval_basis_1d(a0, a1, i, xi_pts)
+        X_vals[i, :] = p
+        dX_vals[i, :] = dp / l
+        ddX_vals[i, :] = ddp / (l**2)
 
-    # Stress expressions
-    w_xx_sol = sp.diff(w_sol, x, 2)
-    w_yy_sol = sp.diff(w_sol, y, 2)
-    w_xy_sol = sp.diff(w_sol, x, y)
+    Y_vals = np.zeros((N, n_gp))
+    dY_vals = np.zeros((N, n_gp))
+    ddY_vals = np.zeros((N, n_gp))
+    for j in range(N):
+        p, dp, ddp = eval_basis_1d(b0, b1, j, eta_pts)
+        Y_vals[j, :] = p
+        dY_vals[j, :] = dp / d
+        ddY_vals[j, :] = ddp / (d**2)
 
-    Mx = -D * (w_xx_sol + v * w_yy_sol)
-    My = -D * (w_yy_sol + v * w_xx_sol)
-    Mxy = -D * (1 - v) * w_xy_sol
+    # Assemble Stiffness Matrix K and Load Vector F
+    # w_xx = ddX * Y,  w_yy = X * ddY,  w_xy = dX * dY
+    K = np.zeros((num_modes, num_modes))
+    F = np.zeros(num_modes)
+    area_det = l * d
 
-    w_fn = sp.lambdify((x, y), w_sol, 'numpy')
-    sx_fn = sp.lambdify((x, y), 6 * Mx / h**2, 'numpy')
-    sy_fn = sp.lambdify((x, y), 6 * My / h**2, 'numpy')
-    txy_fn = sp.lambdify((x, y), 6 * Mxy / h**2, 'numpy')
+    for row in range(num_modes):
+        i_r, j_r = divmod(row, N)
+        phi_r_x = X_vals[i_r, :]
+        dphi_r_x = dX_vals[i_r, :]
+        ddphi_r_x = ddX_vals[i_r, :]
 
-    xs = np.linspace(0, l, 25)
-    ys = np.linspace(0, d, 25)
+        phi_r_y = Y_vals[j_r, :]
+        dphi_r_y = dY_vals[j_r, :]
+        ddphi_r_y = ddY_vals[j_r, :]
+
+        # Load vector integral: q * integral(phi_row dA)
+        int_x = np.sum(w_xi * phi_r_x)
+        int_y = np.sum(w_eta * phi_r_y)
+        F[row] = q * area_det * int_x * int_y
+
+        for col in range(row, num_modes):
+            i_c, j_c = divmod(col, N)
+
+            phi_c_x = X_vals[i_c, :]
+            dphi_c_x = dX_vals[i_c, :]
+            ddphi_c_x = ddX_vals[i_c, :]
+
+            phi_c_y = Y_vals[j_c, :]
+            dphi_c_y = dY_vals[j_c, :]
+            ddphi_c_y = ddY_vals[j_c, :]
+
+            # Bilinear plate bending strain energy integrand:
+            # (w_xx1 * w_xx2 + w_yy1 * w_yy2 + v*(w_xx1*w_yy2 + w_yy1*w_xx2) + 2(1-v)*w_xy1*w_xy2)
+            t1 = np.sum(w_xi * ddphi_r_x * ddphi_c_x) * np.sum(w_eta * phi_r_y * phi_c_y)
+            t2 = np.sum(w_xi * phi_r_x * phi_c_x) * np.sum(w_eta * ddphi_r_y * ddphi_c_y)
+            t3 = v * np.sum(w_xi * ddphi_r_x * phi_c_x) * np.sum(w_eta * phi_r_y * ddphi_c_y)
+            t4 = v * np.sum(w_xi * phi_r_x * ddphi_c_x) * np.sum(w_eta * ddphi_r_y * phi_c_y)
+            t5 = 2.0 * (1.0 - v) * np.sum(w_xi * dphi_r_x * dphi_c_x) * np.sum(w_eta * dphi_r_y * dphi_c_y)
+
+            k_val = D * area_det * (t1 + t2 + t3 + t4 + t5)
+            K[row, col] = k_val
+            K[col, row] = k_val
+
+    # Solve linear system K * c = F
+    try:
+        c = np.linalg.solve(K, F)
+    except np.linalg.LinAlgError:
+        out.innerText = "Error: Numerical singularity in stiffness matrix. Check support conditions."
+        return
+
+    # Evaluate on a 40x40 spatial grid
+    nx, ny = 40, 40
+    xs = np.linspace(0, l, nx)
+    ys = np.linspace(0, d, ny)
     Xg, Yg = np.meshgrid(xs, ys)
 
-    wg = w_fn(Xg, Yg)
-    sx = sx_fn(Xg, Yg)
-    sy = sy_fn(Xg, Yg)
-    txy = txy_fn(Xg, Yg)
+    w_grid = np.zeros_like(Xg)
+    w_xx = np.zeros_like(Xg)
+    w_yy = np.zeros_like(Xg)
+    w_xy = np.zeros_like(Xg)
 
-    # Correct Von Mises stress formula including torsion
-    vmg = np.sqrt(sx**2 - sx*sy + sy**2 + 3 * txy**2)
+    xi_eval = xs / l
+    eta_eval = ys / d
 
-    max_w_idx = np.unravel_index(np.argmax(np.abs(wg)), wg.shape)
-    max_vm_idx = np.unravel_index(np.argmax(vmg), vmg.shape)
+    for m in range(M):
+        p_x, dp_x, ddp_x = eval_basis_1d(a0, a1, m, xi_eval)
+        dp_x = dp_x / l
+        ddp_x = ddp_x / (l**2)
+
+        for n in range(N):
+            coeff = c[m * N + n]
+            if abs(coeff) < 1e-18:
+                continue
+
+            p_y, dp_y, ddp_y = eval_basis_1d(b0, b1, n, eta_eval)
+            dp_y = dp_y / d
+            ddp_y = ddp_y / (d**2)
+
+            # Outer products across grid
+            w_grid += coeff * np.outer(p_y, p_x)
+            w_xx   += coeff * np.outer(p_y, ddp_x)
+            w_yy   += coeff * np.outer(ddp_y, p_x)
+            w_xy   += coeff * np.outer(dp_y, dp_x)
+
+    # Moments
+    Mx = -D * (w_xx + v * w_yy)
+    My = -D * (w_yy + v * w_xx)
+    Mxy = -D * (1.0 - v) * w_xy
+
+    # Surface stresses (at extreme fiber z = h/2)
+    sig_x = 6.0 * np.abs(Mx) / (h**2)
+    sig_y = 6.0 * np.abs(My) / (h**2)
+    tau_xy = 6.0 * np.abs(Mxy) / (h**2)
+
+    # Von Mises plane stress with shear component
+    von_mises = np.sqrt(sig_x**2 - sig_x * sig_y + sig_y**2 + 3.0 * (tau_xy**2))
+
+    max_defl = float(np.max(np.abs(w_grid)))
+    idx_defl = np.unravel_index(np.argmax(np.abs(w_grid)), w_grid.shape)
+    x_defl, y_defl = float(Xg[idx_defl]), float(Yg[idx_defl])
+
+    max_vm = float(np.max(von_mises))
+    idx_vm = np.unravel_index(np.argmax(von_mises), von_mises.shape)
+    x_vm, y_vm = float(Xg[idx_vm]), float(Yg[idx_vm])
 
     out.innerText = (
-        f"Max Deflection: {wg[max_w_idx]:.5f} in at ({Xg[max_w_idx]:.2f}, {Yg[max_w_idx]:.2f})\n"
-        f"Max Von Mises Stress: {vmg[max_vm_idx]:.2f} psi at ({Xg[max_vm_idx]:.2f}, {Yg[max_vm_idx]:.2f})"
+        f"Plate Flexural Rigidity D: {D:.2e} lb-in\n\n"
+        f"Max Deflection: {max_defl:.5f} in\n"
+        f"Location (x, y): ({x_defl:.2f} in, {y_defl:.2f} in)\n\n"
+        f"Max Von Mises Stress: {max_vm:.2f} psi\n"
+        f"Location (x, y): ({x_vm:.2f} in, {y_vm:.2f} in)"
     )
-</script>
+  </script>
+</body>
+</html>
