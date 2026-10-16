@@ -139,6 +139,17 @@
     <label for="q">Uniform Load $q$ (psi):</label>
     <input type="number" id="q" value="5" step="any">
   </div>
+  
+    <fieldset>
+    <legend>Load Type:</legend>
+      <!-- modify to allowed equation in place of a constant value (so loads other than UDL can be utilized -->
+    <label><input type="radio" name="UDL" value="0"> Uniformly Distributed (Full Area)</label>
+    <label><input type="radio" name="UDL" value="1" disabled> Distributed (Partial Area)</label>
+    <label><input type="radio" name="Point" value="2" disabled> Point </label>
+    <label><input type="radio" name="Axial" value="3" disabled> Axial </label>
+    <label><input type="radio" name="Mixed" value="4" disabled> Mixed </label>
+  </fieldset>
+  
   <div class="input-group">
     <label for="E">Modulus of Elasticity $E$ (psi):</label>
     <input type="number" id="E" value="30000000" step="any">
