@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Engineering Plate Deflection & Stress Calculator</title>
+  <title>Plate Deflection & Stress Calculator</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -111,7 +111,7 @@
 
 <div class="container">
   <h1>Kirchhoff Plate Deflection & Stress Calculator</h1>
-  <p class="sub">Rayleigh-Ritz method using orthogonal beam vibration eigenfunctions for fast, accurate benchmark checks.</p>
+  <p class="sub">Rayleigh-Ritz Method Using Orthogonal Beam Vibration Eigenfunctions.</p>
 
   <svg id="plate-svg" viewBox="0 0 400 220">
     <rect x="70" y="30" width="260" height="140" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
@@ -131,7 +131,7 @@
         <div class="radio-group">
           <label><input type="radio" name="a0" value="F"> Free</label>
           <label><input type="radio" name="a0" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="a0" value="C"> Clamped</label>
+          <label><input type="radio" name="a0" value="C"> Fixed </label>
         </div>
       </fieldset>
 
@@ -140,7 +140,7 @@
         <div class="radio-group">
           <label><input type="radio" name="a1" value="F"> Free</label>
           <label><input type="radio" name="a1" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="a1" value="C"> Clamped</label>
+          <label><input type="radio" name="a1" value="C"> Fixed </label>
         </div>
       </fieldset>
 
@@ -149,7 +149,7 @@
         <div class="radio-group">
           <label><input type="radio" name="b0" value="F"> Free</label>
           <label><input type="radio" name="b0" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="b0" value="C"> Clamped</label>
+          <label><input type="radio" name="b0" value="C"> Fixed </label>
         </div>
       </fieldset>
 
@@ -158,18 +158,18 @@
         <div class="radio-group">
           <label><input type="radio" name="b1" value="F"> Free</label>
           <label><input type="radio" name="b1" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="b1" value="C"> Clamped</label>
+          <label><input type="radio" name="b1" value="C"> Fixed </label>
         </div>
       </fieldset>
 
       <div class="input-row" style="margin-top: 1rem;">
-        <label>Terms per Axis (N):</label>
+        <label>Terms per Axis (N) [higher N yields higher accuracy, but requires more computational power]:</label>
         <input type="number" id="num_modes" value="5" min="2" max="7" step="1">
       </div>
     </div>
 
     <div class="panel">
-      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Parameters & Loading</h3>
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Dimensions</h3>
       
       <div class="input-row">
         <label>Length L (in):</label>
@@ -216,7 +216,7 @@
     </div>
   </div>
 
-  <div class="results" id="output">Click "Calculate" to solve.</div>
+  <div class="results" id="output">Ready to Solve.</div>
 </div>
 
 <script>
