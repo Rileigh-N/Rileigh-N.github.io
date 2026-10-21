@@ -2,48 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Plate Deflection & Stress Calculator</title>
+  <!-- setting up color scheme, and visualization of plate -->
+  <!-- visualizationcentered and has width constraint -->
+  <title>Plate Maximum Deflection and Stress Calculator</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --border: #334155;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-    }
+      --bg: #ffaaa5;
+      --card: #fcf8f3;
+      --border: #ffd3b6;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --text: #1e293b;
+      --text-muted: #64748b;
+    } 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
       line-height: 1.5;
     }
     .container {
-      max-width: 900px;
+      max-width: 950px;
       margin: 0 auto;
     }
-    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
-    p.sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; color: #fff; }
+    p.sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem; }
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
-    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
     .panel {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 1.25rem;
+      padding: 1.1rem;
     }
     fieldset {
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.6rem;
     }
     legend {
       font-size: 0.8rem;
@@ -53,24 +55,24 @@
     }
     .radio-group {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       font-size: 0.85rem;
     }
     .input-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.5rem;
       font-size: 0.85rem;
     }
     .input-row label { color: var(--text-muted); }
     input[type="number"], select {
-      background: #0f172a;
+      background: (--bg);
       border: 1px solid var(--border);
       color: #fff;
-      padding: 4px 8px;
+      padding: 4px 6px;
       border-radius: 4px;
-      width: 110px;
+      width: 105px;
       text-align: right;
     }
     button {
@@ -83,7 +85,7 @@
       font-weight: 700;
       font-size: 1rem;
       cursor: pointer;
-      margin-top: 1rem;
+      margin-top: 0.75rem;
       transition: background 0.2s;
     }
     button:hover { background: var(--accent-hover); }
@@ -96,10 +98,15 @@
       font-family: ui-monospace, monospace;
       font-size: 0.85rem;
       white-space: pre-wrap;
+      color: #e2e8f0;
+    }
+    .error-msg {
+      color: #f87171 !important;
+      font-weight: 600;
     }
     svg {
       width: 100%;
-      height: 220px;
+      height: 180px;
       background: #0f172a;
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -110,28 +117,33 @@
 <body>
 
 <div class="container">
-  <h1>Kirchhoff Plate Deflection & Stress Calculator</h1>
-  <p class="sub">Rayleigh-Ritz Method Using Orthogonal Beam Vibration Eigenfunctions.</p>
+  <h1>Plate Deflection & Stress Calculator</h1>
+  <p class="sub">Rayleigh-Ritz Formulation</p>
 
-  <svg id="plate-svg" viewBox="0 0 400 220">
-    <rect x="70" y="30" width="260" height="140" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
-    <text x="200" y="20" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-b1">b1 (y = d)</text>
-    <text x="200" y="195" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-b0">b0 (y = 0)</text>
-    <text x="20" y="105" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-a0">a0 (x = 0)</text>
-    <text x="375" y="105" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-a1">a1 (x = L)</text>
-    <circle id="load-viz" cx="200" cy="100" r="4" fill="#f43f5e" />
+  <!-- Interactive Visualizer -->
+  <svg id="plate-svg" viewBox="0 0 400 180">
+    <rect id="svg-plate" x="80" y="25" width="240" height="130" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+    <text x="200" y="16" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-b1">b1 (y = d)</text>
+    <text x="200" y="172" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-b0">b0 (y = 0)</text>
+    <text x="30" y="93" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-a0">a0 (x = 0)</text>
+    <text x="365" y="93" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-a1">a1 (x = L)</text>
+    
+    <!-- Load visualization elements -->
+    <rect id="svg-patch" x="180" y="70" width="40" height="40" fill="#f43f5e" opacity="0.4" stroke="#f43f5e" stroke-width="1.5" style="display:none;"/>
+    <circle id="svg-point" cx="200" cy="90" r="5" fill="#f43f5e" stroke="#fff" stroke-width="1.5" style="display:none;"/>
   </svg>
 
   <div class="grid">
+    <!-- Boundary Conditions -->
     <div class="panel">
-      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Boundary Conditions</h3>
+      <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem;">Boundary Conditions</h3>
       
       <fieldset>
         <legend>Edge a0 (x = 0)</legend>
         <div class="radio-group">
           <label><input type="radio" name="a0" value="F"> Free</label>
           <label><input type="radio" name="a0" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="a0" value="C"> Fixed </label>
+          <label><input type="radio" name="a0" value="C"> Fixed / Clamped</label>
         </div>
       </fieldset>
 
@@ -140,7 +152,7 @@
         <div class="radio-group">
           <label><input type="radio" name="a1" value="F"> Free</label>
           <label><input type="radio" name="a1" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="a1" value="C"> Fixed </label>
+          <label><input type="radio" name="a1" value="C"> Fixed / Clamped</label>
         </div>
       </fieldset>
 
@@ -149,7 +161,7 @@
         <div class="radio-group">
           <label><input type="radio" name="b0" value="F"> Free</label>
           <label><input type="radio" name="b0" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="b0" value="C"> Fixed </label>
+          <label><input type="radio" name="b0" value="C"> Fixed / Clamped</label>
         </div>
       </fieldset>
 
@@ -158,18 +170,19 @@
         <div class="radio-group">
           <label><input type="radio" name="b1" value="F"> Free</label>
           <label><input type="radio" name="b1" value="S" checked> Simply Supported</label>
-          <label><input type="radio" name="b1" value="C"> Fixed </label>
+          <label><input type="radio" name="b1" value="C"> Fixed / Clamped</label>
         </div>
       </fieldset>
 
-      <div class="input-row" style="margin-top: 1rem;">
-        <label>Terms per Axis (N) [higher N yields higher accuracy, but requires more computational power]:</label>
-        <input type="number" id="num_modes" value="5" min="2" max="7" step="1">
+      <div class="input-row" style="margin-top: 0.8rem;">
+        <label>Terms per Axis (N):</label>
+        <input type="number" id="num_modes" value="5" min="2" max="6" step="1">
       </div>
     </div>
 
+    <!-- Dimensions & Loading -->
     <div class="panel">
-      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Dimensions</h3>
+      <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem;">Plate Dimensions and Loading Conditions</h3>
       
       <div class="input-row">
         <label>Length L (in):</label>
@@ -192,55 +205,102 @@
         <input type="number" id="poi_v" value="0.3" min="0.01" max="0.49" step="0.01">
       </div>
 
-      <div class="input-row" style="margin-top: 0.5rem;">
+      <div class="input-row" style="margin-top: 0.6rem;">
         <label>Load Type:</label>
-        <select id="load_type" onchange="toggleLoadParams()">
-          <option value="UDL">Full Uniform (psi)</option>
-          <option value="PATCH">Center Patch (psi)</option>
-          <option value="POINT">Center Point (lbf)</option>
+        <select id="load_type" onchange="updateLoadUI()">
+          <option value="UDL">Full Uniform (UDL)</option>
+          <option value="TRAP_X">Trapezoidal / Triangular (along x)</option>
+          <option value="TRAP_Y">Trapezoidal / Triangular (along y)</option>
+          <option value="PATCH">Partial Area (Patch)</option>
+          <option value="POINT">Point Load</option>
         </select>
       </div>
-      <div class="input-row">
-        <label id="load_mag_label">Load Magnitude:</label>
-        <input type="number" id="load_mag" value="5">
+
+      <!-- Magnitude Field -->
+      <div class="input-row" id="row_q0">
+        <label id="lbl_q0">Pressure q (psi):</label>
+        <input type="number" id="load_q0" value="5">
       </div>
-      <div class="input-row" id="patch_dim_row" style="display: none;">
-        <label>Patch Size (u × v in):</label>
+
+      <!-- Secondary Magnitude Field (for Trapezoid/Triangle) -->
+      <div class="input-row" id="row_q1" style="display: none;">
+        <label id="lbl_q1">End Pressure q1 (at edge, psi):</label>
+        <input type="number" id="load_q1" value="0">
+      </div>
+
+      <!-- Patch Dimensions (u x v) -->
+      <div class="input-row" id="row_patch_dim" style="display: none;">
+        <label>Patch Size u × v (in):</label>
         <div style="display: flex; gap: 4px;">
-          <input type="number" id="patch_u" value="4" style="width: 52px;">
-          <input type="number" id="patch_v" value="4" style="width: 52px;">
+          <input type="number" id="patch_u" value="4" style="width: 50px;">
+          <input type="number" id="patch_v" value="4" style="width: 50px;">
         </div>
       </div>
 
-      <button onclick="calculatePlate()">Calculate</button>
+      <!-- Center Coordinates (x0, y0) for Patch or Point -->
+      <div class="input-row" id="row_coords" style="display: none;">
+        <label id="lbl_coords">Load Location (x, y in):</label>
+        <div style="display: flex; gap: 4px;">
+          <input type="number" id="coord_x" value="10" style="width: 50px;">
+          <input type="number" id="coord_y" value="5" style="width: 50px;">
+        </div>
+      </div>
+
+      <button id="calc-btn" onclick="calculatePlate()">Calculate</button>
     </div>
   </div>
 
-  <div class="results" id="output">Ready to Solve.</div>
+  <div class="results" id="output">Ready. Click "Calculate" to begin.</div>
 </div>
 
 <script>
-function toggleLoadParams() {
+function updateLoadUI() {
   const type = document.getElementById("load_type").value;
-  const patchRow = document.getElementById("patch_dim_row");
-  const magLbl = document.getElementById("load_mag_label");
-  if (type === "PATCH") {
-    patchRow.style.display = "flex";
-    magLbl.innerText = "Patch Pressure (psi):";
+  const rowQ0 = document.getElementById("row_q0");
+  const lblQ0 = document.getElementById("lbl_q0");
+  const rowQ1 = document.getElementById("row_q1");
+  const rowPatchDim = document.getElementById("row_patch_dim");
+  const rowCoords = document.getElementById("row_coords");
+  const lblCoords = document.getElementById("lbl_coords");
+
+  const svgPatch = document.getElementById("svg-patch");
+  const svgPoint = document.getElementById("svg-point");
+
+  // Reset defaults
+  rowQ1.style.display = "none";
+  rowPatchDim.style.display = "none";
+  rowCoords.style.display = "none";
+  svgPatch.style.display = "none";
+  svgPoint.style.display = "none";
+
+  if (type === "UDL") {
+    lblQ0.innerText = "Uniform Pressure q (psi):";
+  } else if (type === "TRAP_X") {
+    rowQ1.style.display = "flex";
+    lblQ0.innerText = "Start Pressure q0 (at x=0, psi):";
+    document.getElementById("lbl_q1").innerText = "End Pressure q1 (at x=L, psi):";
+  } else if (type === "TRAP_Y") {
+    rowQ1.style.display = "flex";
+    lblQ0.innerText = "Start Pressure q0 (at y=0, psi):";
+    document.getElementById("lbl_q1").innerText = "End Pressure q1 (at y=d, psi):";
+  } else if (type === "PATCH") {
+    lblQ0.innerText = "Patch Pressure q (psi):";
+    rowPatchDim.style.display = "flex";
+    rowCoords.style.display = "flex";
+    lblCoords.innerText = "Patch Center (x, y in):";
+    svgPatch.style.display = "block";
   } else if (type === "POINT") {
-    patchRow.style.display = "none";
-    magLbl.innerText = "Point Load P (lbf):";
-  } else {
-    patchRow.style.display = "none";
-    magLbl.innerText = "Uniform Load q (psi):";
+    lblQ0.innerText = "Point Load P (lbf):";
+    rowCoords.style.display = "flex";
+    lblCoords.innerText = "Point Location (x, y in):";
+    svgPoint.style.display = "block";
   }
 }
 
-// 1D Beam Eigenfunction Generator
-// Returns { phi(xi), dphi(xi), d2phi(xi) } for standard BC combinations
+// Beam Eigenfunctions with exact derivatives
 function getBeamMode(bc0, bc1, m) {
   const combo = bc0 + bc1;
-  const n = m + 1; // 1-based index
+  const n = m + 1;
 
   if (combo === "SS") {
     const beta = n * Math.PI;
@@ -252,7 +312,7 @@ function getBeamMode(bc0, bc1, m) {
   } 
   
   if (combo === "CC") {
-    const betas = [4.73004, 7.85320, 10.9956, 14.1372, 17.2788, 20.4204, 23.5619];
+    const betas = [4.73004, 7.85320, 10.9956, 14.1372, 17.2788, 20.4204];
     const beta = n <= betas.length ? betas[n - 1] : (n + 0.5) * Math.PI;
     const alpha = (Math.cosh(beta) - Math.cos(beta)) / (Math.sinh(beta) - Math.sin(beta));
     return (s) => {
@@ -266,7 +326,7 @@ function getBeamMode(bc0, bc1, m) {
   }
 
   if (combo === "CS" || combo === "SC") {
-    const betas = [3.9266, 7.0686, 10.2102, 13.3518, 16.4934, 19.6350];
+    const betas = [3.9266, 7.0686, 10.2102, 13.3518, 16.4934];
     const beta = n <= betas.length ? betas[n - 1] : (n + 0.25) * Math.PI;
     const alpha = (Math.cosh(beta) - Math.cos(beta)) / (Math.sinh(beta) - Math.sin(beta));
     if (combo === "CS") {
@@ -315,7 +375,7 @@ function getBeamMode(bc0, bc1, m) {
     }
   }
 
-  // Fallback / Free-Free (unsupported side combinations utilize trigonometric polynomial augmentation)
+  // Free-Free fallback
   const beta = n * Math.PI;
   return (s) => ({
     val: Math.cos(beta * s),
@@ -338,7 +398,7 @@ function solveLinearSystem(A, b) {
     const tmpA = A[i]; A[i] = A[max]; A[max] = tmpA;
     const tmpB = b[i]; b[i] = b[max]; b[max] = tmpB;
 
-    if (Math.abs(A[i][i]) < 1e-12) return null; // Singularity
+    if (Math.abs(A[i][i]) < 1e-12) return null;
 
     for (let k = i + 1; k < n; k++) {
       const c = A[k][i] / A[i][i];
@@ -357,194 +417,271 @@ function solveLinearSystem(A, b) {
 
 function calculatePlate() {
   const out = document.getElementById("output");
-  const a0 = document.querySelector("input[name='a0']:checked").value;
-  const a1 = document.querySelector("input[name='a1']:checked").value;
-  const b0 = document.querySelector("input[name='b0']:checked").value;
-  const b1 = document.querySelector("input[name='b1']:checked").value;
+  out.className = "results";
+  out.innerText = "Computing... please wait.";
 
-  const freeEdges = [a0, a1, b0, b1].filter(x => x === 'F').length;
-  if (freeEdges >= 3) {
-    out.innerText = "Error: Plate is statically determinate or unstable (≥ 3 free edges). Must have at least 2 restrained edges.";
-    return;
-  }
+  try {
+    const a0 = document.querySelector("input[name='a0']:checked").value;
+    const a1 = document.querySelector("input[name='a1']:checked").value;
+    const b0 = document.querySelector("input[name='b0']:checked").value;
+    const b1 = document.querySelector("input[name='b1']:checked").value;
 
-  const L = parseFloat(document.getElementById("len").value);
-  const d = parseFloat(document.getElementById("wid").value);
-  const h = parseFloat(document.getElementById("thk").value);
-  const E = parseFloat(document.getElementById("mod_e").value);
-  const v = parseFloat(document.getElementById("poi_v").value);
-  const N = parseInt(document.getElementById("num_modes").value);
-  const loadType = document.getElementById("load_type").value;
-  const loadMag = parseFloat(document.getElementById("load_mag").value);
-
-  const D = (E * Math.pow(h, 3)) / (12 * (1 - v * v));
-  const totalModes = N * N;
-
-  // Build basis function handles
-  const X_modes = [];
-  const Y_modes = [];
-  for (let m = 0; m < N; m++) {
-    X_modes.push(getBeamMode(a0, a1, m));
-    Y_modes.push(getBeamMode(b0, b1, m));
-  }
-
-  // Pre-evaluate modes at Gauss quadrature points
-  const nGP = 8;
-  const xi_pts = GAUSS_PTS.map(p => 0.5 * (p + 1.0));
-  const xi_wts = GAUSS_WTS.map(w => 0.5 * w);
-
-  const X_eval = Array.from({length: N}, () => new Array(nGP));
-  const Y_eval = Array.from({length: N}, () => new Array(nGP));
-
-  for (let i = 0; i < N; i++) {
-    for (let g = 0; g < nGP; g++) {
-      const rx = X_modes[i](xi_pts[g]);
-      X_eval[i][g] = { val: rx.val, d1: rx.d1 / L, d2: rx.d2 / (L * L) };
-
-      const ry = Y_modes[i](xi_pts[g]);
-      Y_eval[i][g] = { val: ry.val, d1: ry.d1 / d, d2: ry.d2 / (d * d) };
+    const freeEdges = [a0, a1, b0, b1].filter(x => x === 'F').length;
+    if (freeEdges >= 3) {
+      out.className = "results error-msg";
+      out.innerText = "Error: Plate is unstable (≥ 3 free edges). Rigid body motion will occur.";
+      return;
     }
-  }
 
-  // Assemble Stiffness Matrix K and Force Vector F
-  const K = Array.from({length: totalModes}, () => new Float64Array(totalModes));
-  const F = new Float64Array(totalModes);
-  const detA = L * d;
+    const L = parseFloat(document.getElementById("len").value);
+    const d = parseFloat(document.getElementById("wid").value);
+    const h = parseFloat(document.getElementById("thk").value);
+    const E = parseFloat(document.getElementById("mod_e").value);
+    const v = parseFloat(document.getElementById("poi_v").value);
+    const N = parseInt(document.getElementById("num_modes").value);
 
-  const patchU = parseFloat(document.getElementById("patch_u")?.value || 0) / L;
-  const patchV = parseFloat(document.getElementById("patch_v")?.value || 0) / d;
+    const loadType = document.getElementById("load_type").value;
+    const q0 = parseFloat(document.getElementById("load_q0").value);
+    const q1El = document.getElementById("load_q1");
+    const q1 = (loadType.startsWith("TRAP") && q1El) ? parseFloat(q1El.value) : q0;
 
-  for (let r = 0; r < totalModes; r++) {
-    const ir = Math.floor(r / N);
-    const jr = r % N;
+    const patchU = parseFloat(document.getElementById("patch_u")?.value || 0);
+    const patchV = parseFloat(document.getElementById("patch_v")?.value || 0);
+    const coordX = parseFloat(document.getElementById("coord_x")?.value || L/2);
+    const coordY = parseFloat(document.getElementById("coord_y")?.value || d/2);
 
-    // Load vector integral
+    if (L <= 0 || d <= 0 || h <= 0 || E <= 0) {
+      out.className = "results error-msg";
+      out.innerText = "Error: Dimensions and material modulus must be strictly positive.";
+      return;
+    }
+
+    // Update SVG visualizer
+    const pW = 240, pH = 130, pX = 80, pY = 25;
     if (loadType === "POINT") {
-      // Evaluated at plate center (xi = 0.5, eta = 0.5)
-      const phix = X_modes[ir](0.5).val;
-      const phiy = Y_modes[jr](0.5).val;
-      F[r] = loadMag * phix * phiy;
+      const cx = pX + (coordX / L) * pW;
+      const cy = pY + (1.0 - coordY / d) * pH;
+      const pt = document.getElementById("svg-point");
+      pt.setAttribute("cx", Math.max(pX, Math.min(pX + pW, cx)));
+      pt.setAttribute("cy", Math.max(pY, Math.min(pY + pH, cy)));
     } else if (loadType === "PATCH") {
-      let int_x = 0, int_y = 0;
-      for (let g = 0; g < nGP; g++) {
-        const x_coord = 0.5 - patchU/2 + xi_pts[g] * patchU;
-        const y_coord = 0.5 - patchV/2 + xi_pts[g] * patchV;
-        int_x += xi_wts[g] * patchU * X_modes[ir](x_coord).val;
-        int_y += xi_wts[g] * patchV * Y_modes[jr](y_coord).val;
-      }
-      F[r] = loadMag * detA * int_x * int_y;
-    } else {
-      // Full UDL
-      let int_x = 0, int_y = 0;
-      for (let g = 0; g < nGP; g++) {
-        int_x += xi_wts[g] * X_eval[ir][g].val;
-        int_y += xi_wts[g] * Y_eval[jr][g].val;
-      }
-      F[r] = loadMag * detA * int_x * int_y;
+      const pw = (patchU / L) * pW;
+      const ph = (patchV / d) * pH;
+      const px = pX + ((coordX - patchU/2) / L) * pW;
+      const py = pY + (1.0 - (coordY + patchV/2) / d) * pH;
+      const pt = document.getElementById("svg-patch");
+      pt.setAttribute("x", px);
+      pt.setAttribute("y", py);
+      pt.setAttribute("width", pw);
+      pt.setAttribute("height", ph);
     }
 
-    for (let c = r; c < totalModes; c++) {
-      const ic = Math.floor(c / N);
-      const jc = c % N;
+    const D = (E * Math.pow(h, 3)) / (12 * (1 - v * v));
+    const totalModes = N * N;
 
-      let I_xx_xx = 0, I_0_0_x = 0, I_xx_0_x = 0, I_0_xx_x = 0, I_x_x_x = 0;
-      let I_0_0_y = 0, I_yy_yy = 0, I_0_yy_y = 0, I_yy_0_y = 0, I_y_y_y = 0;
+    // Basis functions
+    const X_modes = [];
+    const Y_modes = [];
+    for (let m = 0; m < N; m++) {
+      X_modes.push(getBeamMode(a0, a1, m));
+      Y_modes.push(getBeamMode(b0, b1, m));
+    }
 
+    const nGP = 8;
+    const xi_pts = GAUSS_PTS.map(p => 0.5 * (p + 1.0));
+    const xi_wts = GAUSS_WTS.map(w => 0.5 * w);
+
+    const X_eval = Array.from({length: N}, () => new Array(nGP));
+    const Y_eval = Array.from({length: N}, () => new Array(nGP));
+
+    for (let i = 0; i < N; i++) {
       for (let g = 0; g < nGP; g++) {
-        const wx = xi_wts[g];
-        const Xr = X_eval[ir][g];
-        const Xc = X_eval[ic][g];
-        I_xx_xx += wx * Xr.d2 * Xc.d2;
-        I_0_0_x += wx * Xr.val * Xc.val;
-        I_xx_0_x += wx * Xr.d2 * Xc.val;
-        I_0_xx_x += wx * Xr.val * Xc.d2;
-        I_x_x_x += wx * Xr.d1 * Xc.d1;
+        const rx = X_modes[i](xi_pts[g]);
+        X_eval[i][g] = { val: rx.val, d1: rx.d1 / L, d2: rx.d2 / (L * L) };
 
-        const wy = xi_wts[g];
-        const Yr = Y_eval[jr][g];
-        const Yc = Y_eval[jc][g];
-        I_0_0_y += wy * Yr.val * Yc.val;
-        I_yy_yy += wy * Yr.d2 * Yc.d2;
-        I_yy_0_y += wy * Yr.d2 * Yc.val;
-        I_0_yy_y += wy * Yr.val * Yc.d2;
-        I_y_y_y += wy * Yr.d1 * Yc.d1;
-      }
-
-      const t1 = I_xx_xx * I_0_0_y;
-      const t2 = I_0_0_x * I_yy_yy;
-      const t3 = v * I_xx_0_x * I_0_yy_y;
-      const t4 = v * I_0_xx_x * I_yy_0_y;
-      const t5 = 2.0 * (1.0 - v) * I_x_x_x * I_y_y_y;
-
-      const kval = D * detA * (t1 + t2 + t3 + t4 + t5);
-      K[r][c] = kval;
-      K[c][r] = kval;
-    }
-  }
-
-  // Solve linear system
-  const coefs = solveLinearSystem(K, F);
-  if (!coefs) {
-    out.innerText = "Numerical singularity in stiffness matrix. Increase constraint support.";
-    return;
-  }
-
-  // Evaluate max deflection and stresses across a 25x25 grid
-  const steps = 25;
-  let maxW = 0, maxVM = 0;
-  let locW = {x: 0, y: 0}, locVM = {x: 0, y: 0};
-
-  for (let ix = 0; ix <= steps; ix++) {
-    const s_x = ix / steps;
-    const x = s_x * L;
-    for (let iy = 0; iy <= steps; iy++) {
-      const s_y = iy / steps;
-      const y = s_y * d;
-
-      let w = 0, w_xx = 0, w_yy = 0, w_xy = 0;
-
-      for (let r = 0; r < totalModes; r++) {
-        const ir = Math.floor(r / N);
-        const jr = r % N;
-        const c = coefs[r];
-        if (Math.abs(c) < 1e-15) continue;
-
-        const rx = X_modes[ir](s_x);
-        const ry = Y_modes[jr](s_y);
-
-        w += c * rx.val * ry.val;
-        w_xx += c * (rx.d2 / (L * L)) * ry.val;
-        w_yy += c * rx.val * (ry.d2 / (d * d));
-        w_xy += c * (rx.d1 / L) * (ry.d1 / d);
-      }
-
-      if (Math.abs(w) > maxW) {
-        maxW = Math.abs(w);
-        locW = {x, y};
-      }
-
-      const Mx = -D * (w_xx + v * w_yy);
-      const My = -D * (w_yy + v * w_xx);
-      const Mxy = -D * (1 - v) * w_xy;
-
-      const sig_x = 6 * Math.abs(Mx) / (h * h);
-      const sig_y = 6 * Math.abs(My) / (h * h);
-      const tau = 6 * Math.abs(Mxy) / (h * h);
-
-      const vm = Math.sqrt(sig_x * sig_x - sig_x * sig_y + sig_y * sig_y + 3 * tau * tau);
-      if (vm > maxVM) {
-        maxVM = vm;
-        locVM = {x, y};
+        const ry = Y_modes[i](xi_pts[g]);
+        Y_eval[i][g] = { val: ry.val, d1: ry.d1 / d, d2: ry.d2 / (d * d) };
       }
     }
-  }
 
-  out.innerText = 
-    `Rigidity D:               ${D.toExponential(3)} lb·in\n` +
-    `Max Deflection (w_max):   ${maxW.toFixed(5)} in  at (x=${locW.x.toFixed(2)}, y=${locW.y.toFixed(2)})\n` +
-    `Max Von Mises Stress:     ${maxVM.toFixed(1)} psi  at (x=${locVM.x.toFixed(2)}, y=${locVM.y.toFixed(2)})\n\n` +
-    `Status: Admissible boundary modes converged smoothly using N=${N} (${totalModes} total terms).`;
+    const K = Array.from({length: totalModes}, () => new Float64Array(totalModes));
+    const F = new Float64Array(totalModes);
+    const detA = L * d;
+
+    // Force vector integration
+    for (let r = 0; r < totalModes; r++) {
+      const ir = Math.floor(r / N);
+      const jr = r % N;
+
+      if (loadType === "POINT") {
+        // Dirac delta evaluated at (coordX, coordY)
+        const xi_p = Math.min(1.0, Math.max(0.0, coordX / L));
+        const eta_p = Math.min(1.0, Math.max(0.0, coordY / d));
+        const phix = X_modes[ir](xi_p).val;
+        const phiy = Y_modes[jr](eta_p).val;
+        F[r] = q0 * phix * phiy;
+
+      } else if (loadType === "PATCH") {
+        // Integrate over patch sub-domain [x1, x2] x [y1, y2]
+        const xi_start = Math.max(0.0, (coordX - patchU / 2) / L);
+        const xi_end = Math.min(1.0, (coordX + patchU / 2) / L);
+        const d_xi = xi_end - xi_start;
+
+        const eta_start = Math.max(0.0, (coordY - patchV / 2) / d);
+        const eta_end = Math.min(1.0, (coordY + patchV / 2) / d);
+        const d_eta = eta_end - eta_start;
+
+        let int_x = 0, int_y = 0;
+        for (let g = 0; g < nGP; g++) {
+          const pt_x = xi_start + xi_pts[g] * d_xi;
+          const pt_y = eta_start + xi_pts[g] * d_eta;
+          int_x += xi_wts[g] * d_xi * X_modes[ir](pt_x).val;
+          int_y += xi_wts[g] * d_eta * Y_modes[jr](pt_y).val;
+        }
+        F[r] = q0 * detA * int_x * int_y;
+
+      } else if (loadType === "TRAP_X") {
+        let int_x = 0, int_y = 0;
+        for (let g = 0; g < nGP; g++) {
+          const xi = xi_pts[g];
+          const q_xi = q0 + (q1 - q0) * xi;
+          int_x += xi_wts[g] * q_xi * X_eval[ir][g].val;
+          int_y += xi_wts[g] * Y_eval[jr][g].val;
+        }
+        F[r] = detA * int_x * int_y;
+
+      } else if (loadType === "TRAP_Y") {
+        let int_x = 0, int_y = 0;
+        for (let g = 0; g < nGP; g++) {
+          const eta = xi_pts[g];
+          const q_eta = q0 + (q1 - q0) * eta;
+          int_x += xi_wts[g] * X_eval[ir][g].val;
+          int_y += xi_wts[g] * q_eta * Y_eval[jr][g].val;
+        }
+        F[r] = detA * int_x * int_y;
+
+      } else {
+        // Uniform Area (UDL)
+        let int_x = 0, int_y = 0;
+        for (let g = 0; g < nGP; g++) {
+          int_x += xi_wts[g] * X_eval[ir][g].val;
+          int_y += xi_wts[g] * Y_eval[jr][g].val;
+        }
+        F[r] = q0 * detA * int_x * int_y;
+      }
+
+      // Stiffness Matrix K Assembly
+      for (let c = r; c < totalModes; c++) {
+        const ic = Math.floor(c / N);
+        const jc = c % N;
+
+        let I_xx_xx = 0, I_0_0_x = 0, I_xx_0_x = 0, I_0_xx_x = 0, I_x_x_x = 0;
+        let I_0_0_y = 0, I_yy_yy = 0, I_0_yy_y = 0, I_yy_0_y = 0, I_y_y_y = 0;
+
+        for (let g = 0; g < nGP; g++) {
+          const wx = xi_wts[g];
+          const Xr = X_eval[ir][g];
+          const Xc = X_eval[ic][g];
+          I_xx_xx += wx * Xr.d2 * Xc.d2;
+          I_0_0_x += wx * Xr.val * Xc.val;
+          I_xx_0_x += wx * Xr.d2 * Xc.val;
+          I_0_xx_x += wx * Xr.val * Xc.d2;
+          I_x_x_x += wx * Xr.d1 * Xc.d1;
+
+          const wy = xi_wts[g];
+          const Yr = Y_eval[jr][g];
+          const Yc = Y_eval[jc][g];
+          I_0_0_y += wy * Yr.val * Yc.val;
+          I_yy_yy += wy * Yr.d2 * Yc.d2;
+          I_yy_0_y += wy * Yr.d2 * Yc.val;
+          I_0_yy_y += wy * Yr.val * Yc.d2;
+          I_y_y_y += wy * Yr.d1 * Yc.d1;
+        }
+
+        const t1 = I_xx_xx * I_0_0_y;
+        const t2 = I_0_0_x * I_yy_yy;
+        const t3 = v * I_xx_0_x * I_0_yy_y;
+        const t4 = v * I_0_xx_x * I_yy_0_y;
+        const t5 = 2.0 * (1.0 - v) * I_x_x_x * I_y_y_y;
+
+        const kval = D * detA * (t1 + t2 + t3 + t4 + t5);
+        K[r][c] = kval;
+        K[c][r] = kval;
+      }
+    }
+
+    const coefs = solveLinearSystem(K, F);
+    if (!coefs) {
+      out.className = "results error-msg";
+      out.innerText = "Error: Numerical singularity. Check support conditions.";
+      return;
+    }
+
+    // Grid search for maximums
+    const steps = 30;
+    let maxW = 0, maxVM = 0;
+    let locW = {x: 0, y: 0}, locVM = {x: 0, y: 0};
+
+    for (let ix = 0; ix <= steps; ix++) {
+      const s_x = ix / steps;
+      const x = s_x * L;
+      for (let iy = 0; iy <= steps; iy++) {
+        const s_y = iy / steps;
+        const y = s_y * d;
+
+        let w = 0, w_xx = 0, w_yy = 0, w_xy = 0;
+
+        for (let r = 0; r < totalModes; r++) {
+          const ir = Math.floor(r / N);
+          const jr = r % N;
+          const c = coefs[r];
+          if (Math.abs(c) < 1e-15) continue;
+
+          const rx = X_modes[ir](s_x);
+          const ry = Y_modes[jr](s_y);
+
+          w += c * rx.val * ry.val;
+          w_xx += c * (rx.d2 / (L * L)) * ry.val;
+          w_yy += c * rx.val * (ry.d2 / (d * d));
+          w_xy += c * (rx.d1 / L) * (ry.d1 / d);
+        }
+
+        if (Math.abs(w) > maxW) {
+          maxW = Math.abs(w);
+          locW = {x, y};
+        }
+
+        const Mx = -D * (w_xx + v * w_yy);
+        const My = -D * (w_yy + v * w_xx);
+        const Mxy = -D * (1 - v) * w_xy;
+
+        const sig_x = 6 * Math.abs(Mx) / (h * h);
+        const sig_y = 6 * Math.abs(My) / (h * h);
+        const tau = 6 * Math.abs(Mxy) / (h * h);
+
+        const vm = Math.sqrt(sig_x * sig_x - sig_x * sig_y + sig_y * sig_y + 3 * tau * tau);
+        if (vm > maxVM) {
+          maxVM = vm;
+          locVM = {x, y};
+        }
+      }
+    }
+
+    out.innerText = 
+      `Plate Rigidity D:       ${D.toExponential(3)} lb·in\n` +
+      `Max Deflection:         ${maxW.toFixed(5)} in  at (x = ${locW.x.toFixed(2)}, y = ${locW.y.toFixed(2)})\n` +
+      `Max Von Mises Stress:   ${maxVM.toFixed(1)} psi  at (x = ${locVM.x.toFixed(2)}, y = ${locVM.y.toFixed(2)})\n\n` +
+      `Load Mode:              ${loadType}\n` +
+      `Convergence:            N=${N} modes (${totalModes} series terms).`;
+
+  } catch (err) {
+    out.className = "results error-msg";
+    out.innerText = `Runtime Error: ${err.message}\n${err.stack}`;
+  }
 }
+
+// Initial UI setup
+updateLoadUI();
 </script>
 </body>
 </html>
