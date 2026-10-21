@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rectangular Plate Bending Calculator</title>
+  <title>Rectangular Plate Maximum Deflection and Stress Calculator</title>
   <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
   <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
@@ -44,7 +44,7 @@
       border-radius: 4px;
     }
     button {
-      background-color: #4f46e5;
+      background-color: #d4e1ed;
       color: white;
       border: none;
       padding: 0.6rem 1.4rem;
@@ -82,7 +82,7 @@
     <text x="210" y="135" text-anchor="middle" fill="#ffffff" font-size="14">Plate Geometry</text>
 
     <!-- Right Label -->
-    <text x="385" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a1 (x = l)</text>
+    <text x="385" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a1 (x = L)</text>
 
     <!-- Bottom Label -->
     <text x="210" y="245" text-anchor="middle" fill="#818cf8" font-weight="bold">b0 (y = 0)</text>
@@ -100,7 +100,7 @@
   </fieldset>
 
   <fieldset>
-    <legend>Support Condition at a1 (x = l):</legend>
+    <legend>Support Condition at a1 (x = L):</legend>
     <label><input type="radio" name="a1" value="0"> Free</label>
     <label><input type="radio" name="a1" value="1" checked> Simply Supported</label>
     <label><input type="radio" name="a1" value="2"> Fixed</label>
@@ -122,22 +122,22 @@
 
   <h3>Geometry</h3>
   <div class="input-group">
-    <label for="length">Length $l$ (in) [distance a0 to a1]:</label>
-    <input type="number" id="length" value="20" step="any">
+    <label for="length">Length (in) [distance from a0 to a1]:</label>
+    <input type="number" id="length" min = "0" value="20" step="any">
   </div>
   <div class="input-group">
-    <label for="width">Width $d$ (in) [distance b0 to b1]:</label>
-    <input type="number" id="width" value="10" step="any">
+    <label for="width">Width (in) [distance from b0 to b1]:</label>
+    <input type="number" id="width" min = "0" value="10" step="any">
   </div>
   <div class="input-group">
-    <label for="thickness">Thickness $h$ (in):</label>
-    <input type="number" id="thickness" value="0.25" step="any">
+    <label for="thickness">Thickness (in) [dimension not visualized on page]:</label>
+    <input type="number" id="thickness" min = "0" value="0.25" step="any">
   </div>
 
   <h3>Loading & Material Properties</h3>
   <div class="input-group">
-    <label for="q">Uniform Load $q$ (psi):</label>
-    <input type="number" id="q" value="5" step="any">
+    <label for="q">Uniform Load (psi):</label>
+    <input type="number" id="q" min = "0" value="5" step="any">
   </div>
   
     <fieldset>
@@ -146,24 +146,27 @@
     <label><input type="radio" name="UDL" value="0"> Uniformly Distributed (Full Area)</label>
     <label><input type="radio" name="UDL" value="1" disabled> Distributed (Partial Area)</label>
     <label><input type="radio" name="Point" value="2" disabled> Point </label>
-    <label><input type="radio" name="Axial" value="3" disabled> Axial </label>
-    <label><input type="radio" name="Mixed" value="4" disabled> Mixed </label>
   </fieldset>
   
   <div class="input-group">
-    <label for="E">Modulus of Elasticity $E$ (psi):</label>
-    <input type="number" id="E" value="30000000" step="any">
+    <label for="E">Modulus of Elasticity (psi) [default value = 29000 ksi]:</label>
+    <input type="number" id="E" min = "0" value="29000000" step="any">
   </div>
   <div class="input-group">
-    <label for="v">Poisson's Ratio $\nu$:</label>
-    <input type="number" id="v" value="0.3" step="any">
+    <label for="v">Poisson's Ratio [default value = 0.3]:</label>
+    <input type="number" id="v" min = "0" value="0.3" step="any">
   </div>
 
+  <div class="input-group">
+    <label for="N">Number of Trial Functions:
+    <input type="number" id="N" min = "4" value="4" step="any">
+  </div>
+  
   <br>
   <button py-click="calculate_answer">Calculate</button>
 
   <h2>Result:</h2>
-  <div id="output-box">Ready to compute. Enter values and click Calculate.</div>
+  <div id="output-box">Ready to compute.</div>
 
   <script type="py">
 from js import document
@@ -191,28 +194,30 @@ def calculate_answer(event):
         l = get_input_val("#length", "Length")
         d = get_input_val("#width", "Width")
         h = get_input_val("#thickness", "Thickness")
-        q = get_input_val("#q", "Load q")
+        q = get_input_val("#q", "Load")
         E = get_input_val("#E", "Young's Modulus")
         v = get_input_val("#v", "Poisson's Ratio")
+        N = get_input_val("#N", "Number of Trial Functions")
     except Exception as err:
         out.innerText = f"Input Error: {err}"
         return
 
     if l <= 0 or d <= 0 or h <= 0 or E <= 0 or (1.0 - v**2) <= 0:
-        out.innerText = "Error: Length, Width, Thickness, and E must be strictly positive, and 0 <= Poisson's ratio < 1."
+    <!--    out.innerText = "Error: Length, Width, Thickness, and E must be strictly positive, and 0 <= Poisson's ratio < 1." -->
+        out.innerText = "How did you expect to have a dimension or material property of zero?"
         return
 
-    # Check for rigid body instability (at least one boundary condition required)
+    #Check for rigid body instability (at least one boundary condition required)
     if (a0 + a1 + b0 + b1) == 0:
-        out.innerText = "Error: Unconstrained plate (all edges free). Rigid-body motion occurs."
+     <!--   out.innerText = "Error: Unconstrained plate (all edges free). Rigid-body motion occurs." -->
+        out.innerText = "How do you expect a plate with no constraints to behave?"
         return
 
-    # Plate bending rigidity
+    #Plate bending rigidity
     D = E * (h**3) / (12.0 * (1.0 - v**2))
 
-    # Ritz Series Expansion orders (M x N terms)
-    M, N = 4, 4
-    num_modes = M * N
+    #Ritz Series Expansion orders (N x N terms)
+    num_modes = N * N
 
     # Normalized 1D basis polynomials:
     # X_i(xi) = xi^(a0 + i) * (1 - xi)^a1, where xi = x / l in [0, 1]
@@ -241,8 +246,8 @@ def calculate_answer(event):
             
         return phi, dphi, d2phi
 
-    # Precompute basis evaluations using Gauss-Legendre quadrature (N_gp = 16)
-    n_gp = 16
+    #Precompute basis evaluations using Gauss-Legendre quadrature
+    n_gp = num_modes
     xi_g, w_xi = np.polynomial.legendre.leggauss(n_gp)
     eta_g, w_eta = np.polynomial.legendre.leggauss(n_gp)
 
@@ -256,7 +261,7 @@ def calculate_answer(event):
     X_vals = np.zeros((M, n_gp))
     dX_vals = np.zeros((M, n_gp))
     ddX_vals = np.zeros((M, n_gp))
-    for i in range(M):
+    for i in range(N):
         p, dp, ddp = eval_basis_1d(a0, a1, i, xi_pts)
         X_vals[i, :] = p
         dX_vals[i, :] = dp / l
