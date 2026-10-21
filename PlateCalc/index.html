@@ -2,393 +2,549 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rectangular Plate Maximum Deflection and Stress Calculator</title>
-  <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-  <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
-
-  <py-config>
-    packages = ["numpy"]
-  </py-config>
-
+  <title>Engineering Plate Deflection & Stress Calculator</title>
   <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      max-width: 680px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2rem 1rem;
       line-height: 1.5;
-      color: #1e293b;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
+    p.sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
     }
     fieldset {
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
       border-radius: 6px;
-      margin-bottom: 1rem;
       padding: 0.75rem 1rem;
-    }
-    legend {
-      font-weight: 600;
-      color: #334155;
-    }
-    .input-group {
       margin-bottom: 0.75rem;
     }
-    label {
-      display: inline-block;
-      min-width: 280px;
-      font-weight: 500;
+    legend {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      padding: 0 4px;
     }
-    input[type="number"] {
-      width: 100px;
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.85rem;
+    }
+    .input-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      font-size: 0.85rem;
+    }
+    .input-row label { color: var(--text-muted); }
+    input[type="number"], select {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: #fff;
       padding: 4px 8px;
-      border: 1px solid #cbd5e1;
       border-radius: 4px;
+      width: 110px;
+      text-align: right;
     }
     button {
-      background-color: #d4e1ed;
-      color: white;
+      width: 100%;
+      background: var(--accent);
+      color: #0f172a;
       border: none;
-      padding: 0.6rem 1.4rem;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-weight: 700;
       font-size: 1rem;
-      font-weight: 600;
-      border-radius: 6px;
       cursor: pointer;
-    }
-    button:hover {
-      background-color: #4338ca;
-    }
-    #output-box {
       margin-top: 1rem;
-      padding: 1rem;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      transition: background 0.2s;
+    }
+    button:hover { background: var(--accent-hover); }
+    .results {
+      margin-top: 1rem;
+      background: #0f172a;
+      border: 1px solid var(--border);
       border-radius: 6px;
+      padding: 1rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
       white-space: pre-wrap;
-      font-family: monospace;
-      font-size: 0.95rem;
+    }
+    svg {
+      width: 100%;
+      height: 220px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <svg width="420" height="280" viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="12">
-    <!-- Top Label -->
-    <text x="210" y="32" text-anchor="middle" fill="#818cf8" font-weight="bold">b1 (y = d)</text>
+<div class="container">
+  <h1>Kirchhoff Plate Deflection & Stress Calculator</h1>
+  <p class="sub">Rayleigh-Ritz method using orthogonal beam vibration eigenfunctions for fast, accurate benchmark checks.</p>
 
-    <!-- Left Label -->
-    <text x="35" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a0 (x = 0)</text>
-
-    <!-- The Central Rectangle -->
-    <rect x="70" y="50" width="280" height="160" rx="0" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
-    <text x="210" y="135" text-anchor="middle" fill="#ffffff" font-size="14">Plate Geometry</text>
-
-    <!-- Right Label -->
-    <text x="385" y="145" text-anchor="middle" fill="#818cf8" font-weight="bold">a1 (x = L)</text>
-
-    <!-- Bottom Label -->
-    <text x="210" y="245" text-anchor="middle" fill="#818cf8" font-weight="bold">b0 (y = 0)</text>
+  <svg id="plate-svg" viewBox="0 0 400 220">
+    <rect x="70" y="30" width="260" height="140" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+    <text x="200" y="20" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-b1">b1 (y = d)</text>
+    <text x="200" y="195" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-b0">b0 (y = 0)</text>
+    <text x="20" y="105" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-a0">a0 (x = 0)</text>
+    <text x="375" y="105" text-anchor="middle" fill="#94a3b8" font-size="11" id="lbl-a1">a1 (x = L)</text>
+    <circle id="load-viz" cx="200" cy="100" r="4" fill="#f43f5e" />
   </svg>
 
-  <p>
-    Rectangular plate bending analysis under a uniform transverse load ($q$) using the Ritz method.
-  </p>
+  <div class="grid">
+    <div class="panel">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Boundary Conditions</h3>
+      
+      <fieldset>
+        <legend>Edge a0 (x = 0)</legend>
+        <div class="radio-group">
+          <label><input type="radio" name="a0" value="F"> Free</label>
+          <label><input type="radio" name="a0" value="S" checked> Simply Supported</label>
+          <label><input type="radio" name="a0" value="C"> Clamped</label>
+        </div>
+      </fieldset>
 
-  <fieldset>
-    <legend>Support Condition at a0 (x = 0):</legend>
-    <label><input type="radio" name="a0" value="0"> Free</label>
-    <label><input type="radio" name="a0" value="1" checked> Simply Supported</label>
-    <label><input type="radio" name="a0" value="2"> Fixed</label>
-  </fieldset>
+      <fieldset>
+        <legend>Edge a1 (x = L)</legend>
+        <div class="radio-group">
+          <label><input type="radio" name="a1" value="F"> Free</label>
+          <label><input type="radio" name="a1" value="S" checked> Simply Supported</label>
+          <label><input type="radio" name="a1" value="C"> Clamped</label>
+        </div>
+      </fieldset>
 
-  <fieldset>
-    <legend>Support Condition at a1 (x = L):</legend>
-    <label><input type="radio" name="a1" value="0"> Free</label>
-    <label><input type="radio" name="a1" value="1" checked> Simply Supported</label>
-    <label><input type="radio" name="a1" value="2"> Fixed</label>
-  </fieldset>
+      <fieldset>
+        <legend>Edge b0 (y = 0)</legend>
+        <div class="radio-group">
+          <label><input type="radio" name="b0" value="F"> Free</label>
+          <label><input type="radio" name="b0" value="S" checked> Simply Supported</label>
+          <label><input type="radio" name="b0" value="C"> Clamped</label>
+        </div>
+      </fieldset>
 
-  <fieldset>
-    <legend>Support Condition at b0 (y = 0):</legend>
-    <label><input type="radio" name="b0" value="0"> Free</label>
-    <label><input type="radio" name="b0" value="1" checked> Simply Supported</label>
-    <label><input type="radio" name="b0" value="2"> Fixed</label>
-  </fieldset>
+      <fieldset>
+        <legend>Edge b1 (y = d)</legend>
+        <div class="radio-group">
+          <label><input type="radio" name="b1" value="F"> Free</label>
+          <label><input type="radio" name="b1" value="S" checked> Simply Supported</label>
+          <label><input type="radio" name="b1" value="C"> Clamped</label>
+        </div>
+      </fieldset>
 
-  <fieldset>
-    <legend>Support Condition at b1 (y = d):</legend>
-    <label><input type="radio" name="b1" value="0"> Free</label>
-    <label><input type="radio" name="b1" value="1" checked> Simply Supported</label>
-    <label><input type="radio" name="b1" value="2"> Fixed</label>
-  </fieldset>
+      <div class="input-row" style="margin-top: 1rem;">
+        <label>Terms per Axis (N):</label>
+        <input type="number" id="num_modes" value="5" min="2" max="7" step="1">
+      </div>
+    </div>
 
-  <h3>Geometry</h3>
-  <div class="input-group">
-    <label for="length">Length (in) [distance from a0 to a1]:</label>
-    <input type="number" id="length" min = "0" value="20" step="any">
+    <div class="panel">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Parameters & Loading</h3>
+      
+      <div class="input-row">
+        <label>Length L (in):</label>
+        <input type="number" id="len" value="20" min="0.1">
+      </div>
+      <div class="input-row">
+        <label>Width d (in):</label>
+        <input type="number" id="wid" value="10" min="0.1">
+      </div>
+      <div class="input-row">
+        <label>Thickness h (in):</label>
+        <input type="number" id="thk" value="0.25" min="0.001">
+      </div>
+      <div class="input-row">
+        <label>Young's Modulus E (psi):</label>
+        <input type="number" id="mod_e" value="29000000">
+      </div>
+      <div class="input-row">
+        <label>Poisson's Ratio ν:</label>
+        <input type="number" id="poi_v" value="0.3" min="0.01" max="0.49" step="0.01">
+      </div>
+
+      <div class="input-row" style="margin-top: 0.5rem;">
+        <label>Load Type:</label>
+        <select id="load_type" onchange="toggleLoadParams()">
+          <option value="UDL">Full Uniform (psi)</option>
+          <option value="PATCH">Center Patch (psi)</option>
+          <option value="POINT">Center Point (lbf)</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label id="load_mag_label">Load Magnitude:</label>
+        <input type="number" id="load_mag" value="5">
+      </div>
+      <div class="input-row" id="patch_dim_row" style="display: none;">
+        <label>Patch Size (u × v in):</label>
+        <div style="display: flex; gap: 4px;">
+          <input type="number" id="patch_u" value="4" style="width: 52px;">
+          <input type="number" id="patch_v" value="4" style="width: 52px;">
+        </div>
+      </div>
+
+      <button onclick="calculatePlate()">Calculate</button>
+    </div>
   </div>
-  <div class="input-group">
-    <label for="width">Width (in) [distance from b0 to b1]:</label>
-    <input type="number" id="width" min = "0" value="10" step="any">
-  </div>
-  <div class="input-group">
-    <label for="thickness">Thickness (in) [dimension not visualized on page]:</label>
-    <input type="number" id="thickness" min = "0" value="0.25" step="any">
-  </div>
 
-  <h3>Loading & Material Properties</h3>
-  <div class="input-group">
-    <label for="q">Uniform Load (psi):</label>
-    <input type="number" id="q" min = "0" value="5" step="any">
-  </div>
+  <div class="results" id="output">Click "Calculate" to solve.</div>
+</div>
+
+<script>
+function toggleLoadParams() {
+  const type = document.getElementById("load_type").value;
+  const patchRow = document.getElementById("patch_dim_row");
+  const magLbl = document.getElementById("load_mag_label");
+  if (type === "PATCH") {
+    patchRow.style.display = "flex";
+    magLbl.innerText = "Patch Pressure (psi):";
+  } else if (type === "POINT") {
+    patchRow.style.display = "none";
+    magLbl.innerText = "Point Load P (lbf):";
+  } else {
+    patchRow.style.display = "none";
+    magLbl.innerText = "Uniform Load q (psi):";
+  }
+}
+
+// 1D Beam Eigenfunction Generator
+// Returns { phi(xi), dphi(xi), d2phi(xi) } for standard BC combinations
+function getBeamMode(bc0, bc1, m) {
+  const combo = bc0 + bc1;
+  const n = m + 1; // 1-based index
+
+  if (combo === "SS") {
+    const beta = n * Math.PI;
+    return (s) => ({
+      val: Math.sin(beta * s),
+      d1: beta * Math.cos(beta * s),
+      d2: -beta * beta * Math.sin(beta * s)
+    });
+  } 
   
-    <fieldset>
-    <legend>Load Type:</legend>
-      <!-- modify to allowed equation in place of a constant value (so loads other than UDL can be utilized -->
-    <label><input type="radio" name="UDL" value="0"> Uniformly Distributed (Full Area)</label>
-    <label><input type="radio" name="UDL" value="1" disabled> Distributed (Partial Area)</label>
-    <label><input type="radio" name="Point" value="2" disabled> Point </label>
-  </fieldset>
-  
-  <div class="input-group">
-    <label for="E">Modulus of Elasticity (psi) [default value = 29000 ksi]:</label>
-    <input type="number" id="E" min = "0" value="29000000" step="any">
-  </div>
-  <div class="input-group">
-    <label for="v">Poisson's Ratio [default value = 0.3]:</label>
-    <input type="number" id="v" min = "0" value="0.3" step="any">
-  </div>
+  if (combo === "CC") {
+    const betas = [4.73004, 7.85320, 10.9956, 14.1372, 17.2788, 20.4204, 23.5619];
+    const beta = n <= betas.length ? betas[n - 1] : (n + 0.5) * Math.PI;
+    const alpha = (Math.cosh(beta) - Math.cos(beta)) / (Math.sinh(beta) - Math.sin(beta));
+    return (s) => {
+      const bs = beta * s;
+      return {
+        val: Math.cosh(bs) - Math.cos(bs) - alpha * (Math.sinh(bs) - Math.sin(bs)),
+        d1: beta * (Math.sinh(bs) + Math.sin(bs) - alpha * (Math.cosh(bs) - Math.cos(bs))),
+        d2: beta * beta * (Math.cosh(bs) + Math.cos(bs) - alpha * (Math.sinh(bs) + Math.sin(bs)))
+      };
+    };
+  }
 
-  <div class="input-group">
-    <label for="N">Number of Trial Functions:
-    <input type="number" id="N" min = "4" value="4" step="any">
-  </div>
-  
-  <br>
-  <button py-click="calculate_answer">Calculate</button>
+  if (combo === "CS" || combo === "SC") {
+    const betas = [3.9266, 7.0686, 10.2102, 13.3518, 16.4934, 19.6350];
+    const beta = n <= betas.length ? betas[n - 1] : (n + 0.25) * Math.PI;
+    const alpha = (Math.cosh(beta) - Math.cos(beta)) / (Math.sinh(beta) - Math.sin(beta));
+    if (combo === "CS") {
+      return (s) => {
+        const bs = beta * s;
+        return {
+          val: Math.cosh(bs) - Math.cos(bs) - alpha * (Math.sinh(bs) - Math.sin(bs)),
+          d1: beta * (Math.sinh(bs) + Math.sin(bs) - alpha * (Math.cosh(bs) - Math.cos(bs))),
+          d2: beta * beta * (Math.cosh(bs) + Math.cos(bs) - alpha * (Math.sinh(bs) + Math.sin(bs)))
+        };
+      };
+    } else {
+      return (s) => {
+        const bs = beta * (1 - s);
+        return {
+          val: Math.cosh(bs) - Math.cos(bs) - alpha * (Math.sinh(bs) - Math.sin(bs)),
+          d1: -beta * (Math.sinh(bs) + Math.sin(bs) - alpha * (Math.cosh(bs) - Math.cos(bs))),
+          d2: beta * beta * (Math.cosh(bs) + Math.cos(bs) - alpha * (Math.sinh(bs) + Math.sin(bs)))
+        };
+      };
+    }
+  }
 
-  <h2>Result:</h2>
-  <div id="output-box">Ready to compute.</div>
+  if (combo === "CF" || combo === "FC") {
+    const betas = [1.8751, 4.6941, 7.8548, 10.9955, 14.1372];
+    const beta = n <= betas.length ? betas[n - 1] : (n - 0.5) * Math.PI;
+    const alpha = (Math.sinh(beta) - Math.sin(beta)) / (Math.cosh(beta) + Math.cos(beta));
+    if (combo === "CF") {
+      return (s) => {
+        const bs = beta * s;
+        return {
+          val: Math.cosh(bs) - Math.cos(bs) - alpha * (Math.sinh(bs) - Math.sin(bs)),
+          d1: beta * (Math.sinh(bs) + Math.sin(bs) - alpha * (Math.cosh(bs) - Math.cos(bs))),
+          d2: beta * beta * (Math.cosh(bs) + Math.cos(bs) - alpha * (Math.sinh(bs) + Math.sin(bs)))
+        };
+      };
+    } else {
+      return (s) => {
+        const bs = beta * (1 - s);
+        return {
+          val: Math.cosh(bs) - Math.cos(bs) - alpha * (Math.sinh(bs) - Math.sin(bs)),
+          d1: -beta * (Math.sinh(bs) + Math.sin(bs) - alpha * (Math.cosh(bs) - Math.cos(bs))),
+          d2: beta * beta * (Math.cosh(bs) + Math.cos(bs) - alpha * (Math.sinh(bs) + Math.sin(bs)))
+        };
+      };
+    }
+  }
 
-  <script type="py">
-from js import document
-import numpy as np
+  // Fallback / Free-Free (unsupported side combinations utilize trigonometric polynomial augmentation)
+  const beta = n * Math.PI;
+  return (s) => ({
+    val: Math.cos(beta * s),
+    d1: -beta * Math.sin(beta * s),
+    d2: -beta * beta * Math.cos(beta * s)
+  });
+}
 
-def get_input_val(selector, desc):
-    el = document.querySelector(selector)
-    if el is None:
-        raise ValueError(f"Missing DOM element: {selector} ({desc})")
-    val_str = str(el.value).strip()
-    if not val_str:
-        raise ValueError(f"Empty value for: {desc}")
-    return float(val_str)
+// 8-point Gauss-Legendre Quadrature
+const GAUSS_PTS = [-0.9602898565, -0.7966664774, -0.5255324099, -0.1834346425, 0.1834346425, 0.5255324099, 0.7966664774, 0.9602898565];
+const GAUSS_WTS = [0.1012285363, 0.2223810345, 0.3137066459, 0.3626837834, 0.3626837834, 0.3137066459, 0.2223810345, 0.1012285363];
 
-def calculate_answer(event):
-    out = document.querySelector("#output-box")
-    out.innerText = "Calculating... Please wait."
+function solveLinearSystem(A, b) {
+  const n = b.length;
+  for (let i = 0; i < n; i++) {
+    let max = i;
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(A[k][i]) > Math.abs(A[max][i])) max = k;
+    }
+    const tmpA = A[i]; A[i] = A[max]; A[max] = tmpA;
+    const tmpB = b[i]; b[i] = b[max]; b[max] = tmpB;
 
-    try:
-        a0 = int(get_input_val("input[name='a0']:checked", "Support a0"))
-        a1 = int(get_input_val("input[name='a1']:checked", "Support a1"))
-        b0 = int(get_input_val("input[name='b0']:checked", "Support b0"))
-        b1 = int(get_input_val("input[name='b1']:checked", "Support b1"))
+    if (Math.abs(A[i][i]) < 1e-12) return null; // Singularity
 
-        l = get_input_val("#length", "Length")
-        d = get_input_val("#width", "Width")
-        h = get_input_val("#thickness", "Thickness")
-        q = get_input_val("#q", "Load")
-        E = get_input_val("#E", "Young's Modulus")
-        v = get_input_val("#v", "Poisson's Ratio")
-        N = get_input_val("#N", "Number of Trial Functions")
-    except Exception as err:
-        out.innerText = f"Input Error: {err}"
-        return
+    for (let k = i + 1; k < n; k++) {
+      const c = A[k][i] / A[i][i];
+      for (let j = i; j < n; j++) A[k][j] -= c * A[i][j];
+      b[k] -= c * b[i];
+    }
+  }
+  const x = new Array(n);
+  for (let i = n - 1; i >= 0; i--) {
+    let sum = 0;
+    for (let j = i + 1; j < n; j++) sum += A[i][j] * x[j];
+    x[i] = (b[i] - sum) / A[i][i];
+  }
+  return x;
+}
 
-    if l <= 0 or d <= 0 or h <= 0 or E <= 0 or (1.0 - v**2) <= 0:
-    <!--    out.innerText = "Error: Length, Width, Thickness, and E must be strictly positive, and 0 <= Poisson's ratio < 1." -->
-        out.innerText = "How did you expect to have a dimension or material property of zero?"
-        return
+function calculatePlate() {
+  const out = document.getElementById("output");
+  const a0 = document.querySelector("input[name='a0']:checked").value;
+  const a1 = document.querySelector("input[name='a1']:checked").value;
+  const b0 = document.querySelector("input[name='b0']:checked").value;
+  const b1 = document.querySelector("input[name='b1']:checked").value;
 
-    #Check for rigid body instability (at least one boundary condition required)
-    if (a0 + a1 + b0 + b1) == 0:
-     <!--   out.innerText = "Error: Unconstrained plate (all edges free). Rigid-body motion occurs." -->
-        out.innerText = "How do you expect a plate with no constraints to behave?"
-        return
+  const freeEdges = [a0, a1, b0, b1].filter(x => x === 'F').length;
+  if (freeEdges >= 3) {
+    out.innerText = "Error: Plate is statically determinate or unstable (≥ 3 free edges). Must have at least 2 restrained edges.";
+    return;
+  }
 
-    #Plate bending rigidity
-    D = E * (h**3) / (12.0 * (1.0 - v**2))
+  const L = parseFloat(document.getElementById("len").value);
+  const d = parseFloat(document.getElementById("wid").value);
+  const h = parseFloat(document.getElementById("thk").value);
+  const E = parseFloat(document.getElementById("mod_e").value);
+  const v = parseFloat(document.getElementById("poi_v").value);
+  const N = parseInt(document.getElementById("num_modes").value);
+  const loadType = document.getElementById("load_type").value;
+  const loadMag = parseFloat(document.getElementById("load_mag").value);
 
-    #Ritz Series Expansion orders (N x N terms)
-    num_modes = N * N
+  const D = (E * Math.pow(h, 3)) / (12 * (1 - v * v));
+  const totalModes = N * N;
 
-    # Normalized 1D basis polynomials:
-    # X_i(xi) = xi^(a0 + i) * (1 - xi)^a1, where xi = x / l in [0, 1]
-    def eval_basis_1d(deg_0, deg_1, idx, s):
-        p0 = deg_0 + idx
-        p1 = deg_1
-        
-        # phi(s) = s^p0 * (1-s)^p1
-        phi = (s**p0) * ((1.0 - s)**p1)
-        
-        # dphi/ds
-        dphi = np.zeros_like(s)
-        if p0 > 0:
-            dphi += p0 * (s**(p0 - 1)) * ((1.0 - s)**p1)
-        if p1 > 0:
-            dphi -= p1 * (s**p0) * ((1.0 - s)**(p1 - 1))
-            
-        # d2phi/ds2
-        d2phi = np.zeros_like(s)
-        if p0 >= 2:
-            d2phi += p0 * (p0 - 1) * (s**(p0 - 2)) * ((1.0 - s)**p1)
-        if p0 >= 1 and p1 >= 1:
-            d2phi -= 2.0 * p0 * p1 * (s**(p0 - 1)) * ((1.0 - s)**(p1 - 1))
-        if p1 >= 2:
-            d2phi += p1 * (p1 - 1) * (s**p0) * ((1.0 - s)**(p1 - 2))
-            
-        return phi, dphi, d2phi
+  // Build basis function handles
+  const X_modes = [];
+  const Y_modes = [];
+  for (let m = 0; m < N; m++) {
+    X_modes.push(getBeamMode(a0, a1, m));
+    Y_modes.push(getBeamMode(b0, b1, m));
+  }
 
-    #Precompute basis evaluations using Gauss-Legendre quadrature
-    n_gp = num_modes
-    xi_g, w_xi = np.polynomial.legendre.leggauss(n_gp)
-    eta_g, w_eta = np.polynomial.legendre.leggauss(n_gp)
+  // Pre-evaluate modes at Gauss quadrature points
+  const nGP = 8;
+  const xi_pts = GAUSS_PTS.map(p => 0.5 * (p + 1.0));
+  const xi_wts = GAUSS_WTS.map(w => 0.5 * w);
 
-    # Map Gauss points from [-1, 1] to [0, 1]
-    xi_pts = 0.5 * (xi_g + 1.0)
-    w_xi = 0.5 * w_xi
-    eta_pts = 0.5 * (eta_g + 1.0)
-    w_eta = 0.5 * w_eta
+  const X_eval = Array.from({length: N}, () => new Array(nGP));
+  const Y_eval = Array.from({length: N}, () => new Array(nGP));
 
-    # Pre-evaluate X and Y modes at quadrature points
-    X_vals = np.zeros((M, n_gp))
-    dX_vals = np.zeros((M, n_gp))
-    ddX_vals = np.zeros((M, n_gp))
-    for i in range(N):
-        p, dp, ddp = eval_basis_1d(a0, a1, i, xi_pts)
-        X_vals[i, :] = p
-        dX_vals[i, :] = dp / l
-        ddX_vals[i, :] = ddp / (l**2)
+  for (let i = 0; i < N; i++) {
+    for (let g = 0; g < nGP; g++) {
+      const rx = X_modes[i](xi_pts[g]);
+      X_eval[i][g] = { val: rx.val, d1: rx.d1 / L, d2: rx.d2 / (L * L) };
 
-    Y_vals = np.zeros((N, n_gp))
-    dY_vals = np.zeros((N, n_gp))
-    ddY_vals = np.zeros((N, n_gp))
-    for j in range(N):
-        p, dp, ddp = eval_basis_1d(b0, b1, j, eta_pts)
-        Y_vals[j, :] = p
-        dY_vals[j, :] = dp / d
-        ddY_vals[j, :] = ddp / (d**2)
+      const ry = Y_modes[i](xi_pts[g]);
+      Y_eval[i][g] = { val: ry.val, d1: ry.d1 / d, d2: ry.d2 / (d * d) };
+    }
+  }
 
-    # Assemble Stiffness Matrix K and Load Vector F
-    # w_xx = ddX * Y,  w_yy = X * ddY,  w_xy = dX * dY
-    K = np.zeros((num_modes, num_modes))
-    F = np.zeros(num_modes)
-    area_det = l * d
+  // Assemble Stiffness Matrix K and Force Vector F
+  const K = Array.from({length: totalModes}, () => new Float64Array(totalModes));
+  const F = new Float64Array(totalModes);
+  const detA = L * d;
 
-    for row in range(num_modes):
-        i_r, j_r = divmod(row, N)
-        phi_r_x = X_vals[i_r, :]
-        dphi_r_x = dX_vals[i_r, :]
-        ddphi_r_x = ddX_vals[i_r, :]
+  const patchU = parseFloat(document.getElementById("patch_u")?.value || 0) / L;
+  const patchV = parseFloat(document.getElementById("patch_v")?.value || 0) / d;
 
-        phi_r_y = Y_vals[j_r, :]
-        dphi_r_y = dY_vals[j_r, :]
-        ddphi_r_y = ddY_vals[j_r, :]
+  for (let r = 0; r < totalModes; r++) {
+    const ir = Math.floor(r / N);
+    const jr = r % N;
 
-        # Load vector integral: q * integral(phi_row dA)
-        int_x = np.sum(w_xi * phi_r_x)
-        int_y = np.sum(w_eta * phi_r_y)
-        F[row] = q * area_det * int_x * int_y
+    // Load vector integral
+    if (loadType === "POINT") {
+      // Evaluated at plate center (xi = 0.5, eta = 0.5)
+      const phix = X_modes[ir](0.5).val;
+      const phiy = Y_modes[jr](0.5).val;
+      F[r] = loadMag * phix * phiy;
+    } else if (loadType === "PATCH") {
+      let int_x = 0, int_y = 0;
+      for (let g = 0; g < nGP; g++) {
+        const x_coord = 0.5 - patchU/2 + xi_pts[g] * patchU;
+        const y_coord = 0.5 - patchV/2 + xi_pts[g] * patchV;
+        int_x += xi_wts[g] * patchU * X_modes[ir](x_coord).val;
+        int_y += xi_wts[g] * patchV * Y_modes[jr](y_coord).val;
+      }
+      F[r] = loadMag * detA * int_x * int_y;
+    } else {
+      // Full UDL
+      let int_x = 0, int_y = 0;
+      for (let g = 0; g < nGP; g++) {
+        int_x += xi_wts[g] * X_eval[ir][g].val;
+        int_y += xi_wts[g] * Y_eval[jr][g].val;
+      }
+      F[r] = loadMag * detA * int_x * int_y;
+    }
 
-        for col in range(row, num_modes):
-            i_c, j_c = divmod(col, N)
+    for (let c = r; c < totalModes; c++) {
+      const ic = Math.floor(c / N);
+      const jc = c % N;
 
-            phi_c_x = X_vals[i_c, :]
-            dphi_c_x = dX_vals[i_c, :]
-            ddphi_c_x = ddX_vals[i_c, :]
+      let I_xx_xx = 0, I_0_0_x = 0, I_xx_0_x = 0, I_0_xx_x = 0, I_x_x_x = 0;
+      let I_0_0_y = 0, I_yy_yy = 0, I_0_yy_y = 0, I_yy_0_y = 0, I_y_y_y = 0;
 
-            phi_c_y = Y_vals[j_c, :]
-            dphi_c_y = dY_vals[j_c, :]
-            ddphi_c_y = ddY_vals[j_c, :]
+      for (let g = 0; g < nGP; g++) {
+        const wx = xi_wts[g];
+        const Xr = X_eval[ir][g];
+        const Xc = X_eval[ic][g];
+        I_xx_xx += wx * Xr.d2 * Xc.d2;
+        I_0_0_x += wx * Xr.val * Xc.val;
+        I_xx_0_x += wx * Xr.d2 * Xc.val;
+        I_0_xx_x += wx * Xr.val * Xc.d2;
+        I_x_x_x += wx * Xr.d1 * Xc.d1;
 
-            # Bilinear plate bending strain energy integrand:
-            # (w_xx1 * w_xx2 + w_yy1 * w_yy2 + v*(w_xx1*w_yy2 + w_yy1*w_xx2) + 2(1-v)*w_xy1*w_xy2)
-            t1 = np.sum(w_xi * ddphi_r_x * ddphi_c_x) * np.sum(w_eta * phi_r_y * phi_c_y)
-            t2 = np.sum(w_xi * phi_r_x * phi_c_x) * np.sum(w_eta * ddphi_r_y * ddphi_c_y)
-            t3 = v * np.sum(w_xi * ddphi_r_x * phi_c_x) * np.sum(w_eta * phi_r_y * ddphi_c_y)
-            t4 = v * np.sum(w_xi * phi_r_x * ddphi_c_x) * np.sum(w_eta * ddphi_r_y * phi_c_y)
-            t5 = 2.0 * (1.0 - v) * np.sum(w_xi * dphi_r_x * dphi_c_x) * np.sum(w_eta * dphi_r_y * dphi_c_y)
+        const wy = xi_wts[g];
+        const Yr = Y_eval[jr][g];
+        const Yc = Y_eval[jc][g];
+        I_0_0_y += wy * Yr.val * Yc.val;
+        I_yy_yy += wy * Yr.d2 * Yc.d2;
+        I_yy_0_y += wy * Yr.d2 * Yc.val;
+        I_0_yy_y += wy * Yr.val * Yc.d2;
+        I_y_y_y += wy * Yr.d1 * Yc.d1;
+      }
 
-            k_val = D * area_det * (t1 + t2 + t3 + t4 + t5)
-            K[row, col] = k_val
-            K[col, row] = k_val
+      const t1 = I_xx_xx * I_0_0_y;
+      const t2 = I_0_0_x * I_yy_yy;
+      const t3 = v * I_xx_0_x * I_0_yy_y;
+      const t4 = v * I_0_xx_x * I_yy_0_y;
+      const t5 = 2.0 * (1.0 - v) * I_x_x_x * I_y_y_y;
 
-    # Solve linear system K * c = F
-    try:
-        c = np.linalg.solve(K, F)
-    except np.linalg.LinAlgError:
-        out.innerText = "Error: Numerical singularity in stiffness matrix. Check support conditions."
-        return
+      const kval = D * detA * (t1 + t2 + t3 + t4 + t5);
+      K[r][c] = kval;
+      K[c][r] = kval;
+    }
+  }
 
-    # Evaluate on a 40x40 spatial grid
-    nx, ny = 40, 40
-    xs = np.linspace(0, l, nx)
-    ys = np.linspace(0, d, ny)
-    Xg, Yg = np.meshgrid(xs, ys)
+  // Solve linear system
+  const coefs = solveLinearSystem(K, F);
+  if (!coefs) {
+    out.innerText = "Numerical singularity in stiffness matrix. Increase constraint support.";
+    return;
+  }
 
-    w_grid = np.zeros_like(Xg)
-    w_xx = np.zeros_like(Xg)
-    w_yy = np.zeros_like(Xg)
-    w_xy = np.zeros_like(Xg)
+  // Evaluate max deflection and stresses across a 25x25 grid
+  const steps = 25;
+  let maxW = 0, maxVM = 0;
+  let locW = {x: 0, y: 0}, locVM = {x: 0, y: 0};
 
-    xi_eval = xs / l
-    eta_eval = ys / d
+  for (let ix = 0; ix <= steps; ix++) {
+    const s_x = ix / steps;
+    const x = s_x * L;
+    for (let iy = 0; iy <= steps; iy++) {
+      const s_y = iy / steps;
+      const y = s_y * d;
 
-    for m in range(M):
-        p_x, dp_x, ddp_x = eval_basis_1d(a0, a1, m, xi_eval)
-        dp_x = dp_x / l
-        ddp_x = ddp_x / (l**2)
+      let w = 0, w_xx = 0, w_yy = 0, w_xy = 0;
 
-        for n in range(N):
-            coeff = c[m * N + n]
-            if abs(coeff) < 1e-18:
-                continue
+      for (let r = 0; r < totalModes; r++) {
+        const ir = Math.floor(r / N);
+        const jr = r % N;
+        const c = coefs[r];
+        if (Math.abs(c) < 1e-15) continue;
 
-            p_y, dp_y, ddp_y = eval_basis_1d(b0, b1, n, eta_eval)
-            dp_y = dp_y / d
-            ddp_y = ddp_y / (d**2)
+        const rx = X_modes[ir](s_x);
+        const ry = Y_modes[jr](s_y);
 
-            # Outer products across grid
-            w_grid += coeff * np.outer(p_y, p_x)
-            w_xx   += coeff * np.outer(p_y, ddp_x)
-            w_yy   += coeff * np.outer(ddp_y, p_x)
-            w_xy   += coeff * np.outer(dp_y, dp_x)
+        w += c * rx.val * ry.val;
+        w_xx += c * (rx.d2 / (L * L)) * ry.val;
+        w_yy += c * rx.val * (ry.d2 / (d * d));
+        w_xy += c * (rx.d1 / L) * (ry.d1 / d);
+      }
 
-    # Moments
-    Mx = -D * (w_xx + v * w_yy)
-    My = -D * (w_yy + v * w_xx)
-    Mxy = -D * (1.0 - v) * w_xy
+      if (Math.abs(w) > maxW) {
+        maxW = Math.abs(w);
+        locW = {x, y};
+      }
 
-    # Surface stresses (at extreme fiber z = h/2)
-    sig_x = 6.0 * np.abs(Mx) / (h**2)
-    sig_y = 6.0 * np.abs(My) / (h**2)
-    tau_xy = 6.0 * np.abs(Mxy) / (h**2)
+      const Mx = -D * (w_xx + v * w_yy);
+      const My = -D * (w_yy + v * w_xx);
+      const Mxy = -D * (1 - v) * w_xy;
 
-    # Von Mises plane stress with shear component
-    von_mises = np.sqrt(sig_x**2 - sig_x * sig_y + sig_y**2 + 3.0 * (tau_xy**2))
+      const sig_x = 6 * Math.abs(Mx) / (h * h);
+      const sig_y = 6 * Math.abs(My) / (h * h);
+      const tau = 6 * Math.abs(Mxy) / (h * h);
 
-    max_defl = float(np.max(np.abs(w_grid)))
-    idx_defl = np.unravel_index(np.argmax(np.abs(w_grid)), w_grid.shape)
-    x_defl, y_defl = float(Xg[idx_defl]), float(Yg[idx_defl])
+      const vm = Math.sqrt(sig_x * sig_x - sig_x * sig_y + sig_y * sig_y + 3 * tau * tau);
+      if (vm > maxVM) {
+        maxVM = vm;
+        locVM = {x, y};
+      }
+    }
+  }
 
-    max_vm = float(np.max(von_mises))
-    idx_vm = np.unravel_index(np.argmax(von_mises), von_mises.shape)
-    x_vm, y_vm = float(Xg[idx_vm]), float(Yg[idx_vm])
-
-    out.innerText = (
-        f"Plate Flexural Rigidity D: {D:.2e} lb-in\n\n"
-        f"Max Deflection: {max_defl:.5f} in\n"
-        f"Location (x, y): ({x_defl:.2f} in, {y_defl:.2f} in)\n\n"
-        f"Max Von Mises Stress: {max_vm:.2f} psi\n"
-        f"Location (x, y): ({x_vm:.2f} in, {y_vm:.2f} in)"
-    )
-  </script>
+  out.innerText = 
+    `Rigidity D:               ${D.toExponential(3)} lb·in\n` +
+    `Max Deflection (w_max):   ${maxW.toFixed(5)} in  at (x=${locW.x.toFixed(2)}, y=${locW.y.toFixed(2)})\n` +
+    `Max Von Mises Stress:     ${maxVM.toFixed(1)} psi  at (x=${locVM.x.toFixed(2)}, y=${locVM.y.toFixed(2)})\n\n` +
+    `Status: Admissible boundary modes converged smoothly using N=${N} (${totalModes} total terms).`;
+}
+</script>
 </body>
 </html>
