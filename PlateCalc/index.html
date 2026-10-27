@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Plate Deflection & Stress Calculator</title>
+  <title>Plate Deflection and Stress Calculator</title>
   <style>
     :root {
-      --bg: #061913;                 /* background */
-      --card: #0b2920;               /* card container */
-      --card-inner: #08211a;         /* inset fieldset / panel background */
-      --border: #1b4d3e;             /* border */
-      --border-focus: #10b981;       /* outline */
-      --accent: #10b981;             /* action */
-      --accent-hover: #059669;       /* hover */
-      --accent-text: #022216;        /* high-contrast dark text */
-      --text: #ecfdf5;               /* text */
-      --text-muted: #6ee7b7;         /* muted labels */
-      --input-bg: #04140f;           /* input fields */
-      --code-bg: #03120d;            /* terminal-style background */
+      --bg: #061913;                  /* background */
+      --card: #0b2920;                /* card container */
+      --card-inner: #08211a;          /* inset fieldset / panel background */
+      --border: #1b4d3e;              /* border */
+      --border-focus: #10b981;        /* outline */
+      --accent: #10b981;              /* action */
+      --accent-hover: #059669;        /* hover */
+      --accent-text: #022216;         /* high-contrast dark text */
+      --text: #ecfdf5;                /* text */
+      --text-muted: #6ee7b7;          /* muted labels */
+      --input-bg: #04140f;            /* input fields */
+      --code-bg: #03120d;             /* terminal-style background */
     } 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -40,7 +40,10 @@
     p.sub { 
       color: var(--text-muted); 
       font-size: 0.85rem; 
-      margin-bottom: 1.25rem; 
+      margin-bottom: 0.25rem; 
+    }
+    .sub-group {
+      margin-bottom: 1.25rem;
     }
     .grid {
       display: grid;
@@ -92,12 +95,12 @@
       color: #f0fdf4;
       padding: 4px 6px;
       border-radius: 4px;
-      width: 105px;
+      width: 115px;
       text-align: right;
       outline: none;
       transition: border-color 0.15s ease;
-      -moz-appearance: textfield;  /* Hide spinners in Firefox */
-      appearance: textfield;       /* Standard property */
+      -moz-appearance: textfield;
+      appearance: textfield;
     }
     input[type="number"]:focus, select:focus {
       border-color: var(--border-focus);
@@ -143,28 +146,59 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
+    details {
+      margin-top: 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    #debug-output {
+      margin-top: 0.75rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      color: #cbd5e1;
+      max-height: 420px;
+      overflow-y: auto;
+      background: var(--code-bg);
+      padding: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Plate Deflection &amp; Stress Calculator</h1>
-  <p class="sub">Built Using Kirchhoff-Love Theory and Rayleigh-Ritz Formulation with Admissible Beam Functions</p>
-  <p class="sub">Assumes Isotropic and Linearly Elastic Behavior</p>
+  <h1>Plate Deflection and Stress Calculator for Preliminary Design</h1>
+  <div class="sub-group">
+    <p class="sub">Kirchhoff-Love Thin Plate Formulation via Rayleigh-Ritz Variational Method</p>
+    <p class="sub">Assumes Behavior is Linear Elastic and Isotropic</p>
+    <p class="sub">Does NOT Consider Shear Deformation and Cannot Accurately Model Thick PLates (L/d > 15)</p>
+  </div>
 
   <!-- Interactive Visualizer -->
   <svg id="plate-svg" viewBox="0 0 400 180">
     <rect id="svg-plate" x="80" y="25" width="240" height="130" fill="#08211a" stroke="#10b981" stroke-width="2"/>
     <text x="200" y="16" text-anchor="middle" fill="#6ee7b7" font-size="11" id="lbl-b1">b1 (y = d)</text>
     <text x="200" y="172" text-anchor="middle" fill="#6ee7b7" font-size="11" id="lbl-b0">b0 (y = 0)</text>
-    <text x="30" y="93" text-anchor="middle" fill="#6ee7b7" font-size="11" id="lbl-a0">a0 (x = 0)</text>
+    <text x="35" y="93" text-anchor="middle" fill="#6ee7b7" font-size="11" id="lbl-a0">a0 (x = 0)</text>
     <text x="365" y="93" text-anchor="middle" fill="#6ee7b7" font-size="11" id="lbl-a1">a1 (x = L)</text>
     
     <!-- Load visualization elements -->
     <rect id="svg-patch" x="180" y="70" width="40" height="40" fill="#f59e0b" opacity="0.45" stroke="#f59e0b" stroke-width="1.5" style="display:none;"/>
     <circle id="svg-point" cx="200" cy="90" r="5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5" style="display:none;"/>
   </svg>
-<div class="grid">
+
+  <div class="grid">
     <!-- Boundary Conditions -->
     <div class="panel">
       <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #f0fdf4;">Boundary Conditions</h3>
@@ -213,15 +247,15 @@
 
     <!-- Dimensions & Loading -->
     <div class="panel">
-      <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #f0fdf4;">Plate Dimensions and Loading Conditions</h3>
+      <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #f0fdf4;">Plate Dimensions and Loading</h3>
       
       <div class="input-row">
         <label>Length L (in):</label>
-        <input type="number" id="len" value="20" min="0.1" step="any" oninput="updateSVGPositions()">
+        <input type="number" id="len" value="20" min="0.1" step="any">
       </div>
       <div class="input-row">
         <label>Width d (in):</label>
-        <input type="number" id="wid" value="10" min="0.1" step="any" oninput="updateSVGPositions()">
+        <input type="number" id="wid" value="10" min="0.1" step="any">
       </div>
       <div class="input-row">
         <label>Thickness h (in):</label>
@@ -249,7 +283,7 @@
 
       <!-- Magnitude Field -->
       <div class="input-row" id="row_q0">
-        <label id="lbl_q0">Pressure q (psi):</label>
+        <label id="lbl_q0">Uniform Pressure q (psi):</label>
         <input type="number" id="load_q0" value="5" step="any">
       </div>
 
@@ -263,8 +297,8 @@
       <div class="input-row" id="row_patch_dim" style="display: none;">
         <label>Patch Size u × v (in):</label>
         <div style="display: flex; gap: 4px;">
-          <input type="number" id="patch_u" value="4" style="width: 50px;" step="any" oninput="updateSVGPositions()">
-          <input type="number" id="patch_v" value="4" style="width: 50px;" step="any" oninput="updateSVGPositions()">
+          <input type="number" id="patch_u" value="4" style="width: 55px;" step="any">
+          <input type="number" id="patch_v" value="4" style="width: 55px;" step="any">
         </div>
       </div>
 
@@ -272,8 +306,8 @@
       <div class="input-row" id="row_coords" style="display: none;">
         <label id="lbl_coords">Load Location (x in, y in):</label>
         <div style="display: flex; gap: 4px;">
-          <input type="number" id="coord_x" value="10" style="width: 50px;" step="any" oninput="updateSVGPositions()">
-          <input type="number" id="coord_y" value="5" style="width: 50px;" step="any" oninput="updateSVGPositions()">
+          <input type="number" id="coord_x" value="10" style="width: 55px;" step="any">
+          <input type="number" id="coord_y" value="5" style="width: 55px;" step="any">
         </div>
       </div>
 
@@ -281,18 +315,14 @@
     </div>
   </div>
 
-  <div class="results" id="output">Make sure to double check your inputs and units, then press "CALCULATE"</div>
+  <div class="results" id="output">Double check inputs and units, then press "CALCULATE".</div>
   
-  <details id="details-panel" style="margin-top: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;">
-    <summary style="cursor: pointer; font-weight: 600; color: var(--accent); font-size: 0.9rem;">
-      Show Detailed Formulation and Intermediate Work
-    </summary>
-    <div id="debug-output" style="margin-top: 0.75rem; font-family: ui-monospace, monospace; font-size: 0.8rem; white-space: pre-wrap; color: #cbd5e1; max-height: 420px; overflow-y: auto; background: var(--code-bg); padding: 0.75rem; border-radius: 4px; border: 1px solid var(--border);">
-      Run a calculation to view intermediate matrices, modal load vectors, and stress components.
-    </div>
+  <details id="details-panel">
+    <summary>Show Detailed Formulation &amp; Intermediate Work</summary>
+    <div id="debug-output">Run a calculation to view intermediate matrices, modal load vectors, and stress components.</div>
   </details>
 </div>
- 
+
 <script>
 function updateSVGPositions() {
   const L = parseFloat(document.getElementById("len").value) || 20;
@@ -303,9 +333,9 @@ function updateSVGPositions() {
   const patchU = parseFloat(document.getElementById("patch_u")?.value || 0);
   const patchV = parseFloat(document.getElementById("patch_v")?.value || 0);
 
-  const pW = 240, pH = 130, pX = 80, pY = 25; /*establishes boundaries for plate visualization to ensure visual remains logical*/
+  const pW = 240, pH = 130, pX = 80, pY = 25;
 
-  if (type === "POINT") { /*establishes center point and relative location of the popint load to the rest of the plate*/
+  if (type === "POINT") {
     const cx = pX + Math.min(1.0, Math.max(0.0, coordX / L)) * pW;
     const cy = pY + (1.0 - Math.min(1.0, Math.max(0.0, coordY / d))) * pH;
     const pt = document.getElementById("svg-point");
@@ -356,45 +386,34 @@ function updateLoadUI() {
     lblQ0.innerText = "Patch Pressure q (psi):";
     rowPatchDim.style.display = "flex";
     rowCoords.style.display = "flex";
-    lblCoords.innerText = "Patch Center (x ft, y in):";
+    lblCoords.innerText = "Patch Center (x in, y in):";
     svgPatch.style.display = "block";
   } else if (type === "POINT") {
     lblQ0.innerText = "Point Load P (lbf):";
     rowCoords.style.display = "flex";
-    lblCoords.innerText = "Point Location (x ft, y in):";
+    lblCoords.innerText = "Point Location (x in, y in):";
     svgPoint.style.display = "block";
   }
   updateSVGPositions();
 }
 
-/**
- * Checks kinematic stability under out-of-plane transverse bending.
- * - 1 Clamped edge (C) provides both deflection and rotational fixity (stable cantilever).
- * - 2 Simply supported non-parallel edges (S-S corner) prevent rigid translation and tilt.
- * - 2 Opposite simply supported edges (e.g. a0=S & a1=S) prevent rigid translation and tilt.
- */
 function isKinematicallyStable(a0, a1, b0, b1) {
   const edges = [a0, a1, b0, b1];
-  if (edges.includes('C')) return true; // Any single clamped edge prevents all rigid-body modes
+  if (edges.includes('C')) return true;
 
   const sCount = edges.filter(e => e === 'S').length;
   if (sCount >= 3) return true;
   if (sCount === 2) {
-    if (a0 === 'S' && a1 === 'S') return true; // Opposite sides supported
-    if (b0 === 'S' && b1 === 'S') return true; // Opposite sides supported
-    if ((a0 === 'S' || a1 === 'S') && (b0 === 'S' || b1 === 'S')) return true; // Orthogonal edges supported
+    if (a0 === 'S' && a1 === 'S') return true;
+    if (b0 === 'S' && b1 === 'S') return true;
+    if ((a0 === 'S' || a1 === 'S') && (b0 === 'S' || b1 === 'S')) return true;
   }
   return false;
 }
 
-/**
- * Admissible 1D Beam Eigenfunctions & Modal Shapes
- * Normalized over s in [0, 1]
- */
 function getBeamMode(bc0, bc1, m) {
   const combo = bc0 + bc1;
 
-  // Simply Supported - Simply Supported
   if (combo === "SS") {
     const n = m + 1;
     const beta = n * Math.PI;
@@ -405,7 +424,6 @@ function getBeamMode(bc0, bc1, m) {
     });
   } 
   
-  // Clamped - Clamped
   if (combo === "CC") {
     const n = m + 1;
     const betas = [4.73004, 7.85320, 10.9956, 14.1372, 17.2788, 20.4204];
@@ -421,7 +439,6 @@ function getBeamMode(bc0, bc1, m) {
     };
   }
 
-  // Clamped - Simply Supported / Simply Supported - Clamped
   if (combo === "CS" || combo === "SC") {
     const n = m + 1;
     const betas = [3.9266, 7.0686, 10.2102, 13.3518, 16.4934];
@@ -448,7 +465,6 @@ function getBeamMode(bc0, bc1, m) {
     }
   }
 
-  // Clamped - Free / Free - Clamped (Cantilever modes)
   if (combo === "CF" || combo === "FC") {
     const n = m + 1;
     const betas = [1.8751, 4.6941, 7.8548, 10.9955, 14.1372, 17.2788];
@@ -475,17 +491,13 @@ function getBeamMode(bc0, bc1, m) {
     }
   }
 
-  // Simply Supported - Free / Free - Simply Supported (Propped Cantilever with Free End)
   if (combo === "SF" || combo === "FS") {
-    // Rigid body rotation mode around hinged support at m = 0
     if (m === 0) {
-      if (combo === "SF") {
-        return (s) => ({ val: s, d1: 1.0, d2: 0.0 });
-      } else {
-        return (s) => ({ val: 1.0 - s, d1: -1.0, d2: 0.0 });
-      }
+      return combo === "SF" 
+        ? (s) => ({ val: s, d1: 1.0, d2: 0.0 })
+        : (s) => ({ val: 1.0 - s, d1: -1.0, d2: 0.0 });
     }
-    const n = m; // elastic modes
+    const n = m;
     const betas = [3.9266, 7.0686, 10.2102, 13.3518, 16.4934];
     const beta = n <= betas.length ? betas[n - 1] : (n + 0.25) * Math.PI;
     const alpha = (Math.sinh(beta) + Math.sin(beta)) / (Math.cosh(beta) + Math.cos(beta));
@@ -510,12 +522,10 @@ function getBeamMode(bc0, bc1, m) {
     }
   }
 
-  // Free - Free (F-F) Admissible Modes
-  // m = 0: Rigid translation (uniform heave)
+  // Free - Free (F-F)
   if (m === 0) {
     return (s) => ({ val: 1.0, d1: 0.0, d2: 0.0 });
   }
-  // m = 1: Rigid rotation (rocking about centroid)
   if (m === 1) {
     return (s) => ({
       val: Math.sqrt(3) * (1.0 - 2.0 * s),
@@ -523,7 +533,6 @@ function getBeamMode(bc0, bc1, m) {
       d2: 0.0
     });
   }
-  // m >= 2: Elastic free-free beam vibrating modes
   const n = m - 1;
   const betas = [4.73004, 7.85320, 10.9956, 14.1372, 17.2788, 20.4204];
   const beta = n <= betas.length ? betas[n - 1] : (n + 0.5) * Math.PI;
@@ -539,39 +548,42 @@ function getBeamMode(bc0, bc1, m) {
   };
 }
 
-// 8-point Gauss-Legendre Quadrature
 const GAUSS_PTS = [-0.9602898565, -0.7966664774, -0.5255324099, -0.1834346425, 0.1834346425, 0.5255324099, 0.7966664774, 0.9602898565];
 const GAUSS_WTS = [0.1012285363, 0.2223810345, 0.3137066459, 0.3626837834, 0.3626837834, 0.3137066459, 0.2223810345, 0.1012285363];
 
 function solveLinearSystem(A, b) {
   const n = b.length;
+  const M = A.map(row => Array.from(row));
+  const rhs = Array.from(b);
+
   for (let i = 0; i < n; i++) {
     let max = i;
     for (let k = i + 1; k < n; k++) {
-      if (Math.abs(A[k][i]) > Math.abs(A[max][i])) max = k;
+      if (Math.abs(M[k][i]) > Math.abs(M[max][i])) max = k;
     }
-    const tmpA = A[i]; A[i] = A[max]; A[max] = tmpA;
-    const tmpB = b[i]; b[i] = b[max]; b[max] = tmpB;
+    const tmpM = M[i]; M[i] = M[max]; M[max] = tmpM;
+    const tmpB = rhs[i]; rhs[i] = rhs[max]; rhs[max] = tmpB;
 
-    if (Math.abs(A[i][i]) < 1e-12) return null;
+    if (Math.abs(M[i][i]) < 1e-13) return null;
 
     for (let k = i + 1; k < n; k++) {
-      const c = A[k][i] / A[i][i];
-      for (let j = i; j < n; j++) A[k][j] -= c * A[i][j];
-      b[k] -= c * b[i];
+      const c = M[k][i] / M[i][i];
+      for (let j = i; j < n; j++) M[k][j] -= c * M[i][j];
+      rhs[k] -= c * rhs[i];
     }
   }
   const x = new Array(n);
   for (let i = n - 1; i >= 0; i--) {
     let sum = 0;
-    for (let j = i + 1; j < n; j++) sum += A[i][j] * x[j];
-    x[i] = (b[i] - sum) / A[i][i];
+    for (let j = i + 1; j < n; j++) sum += M[i][j] * x[j];
+    x[i] = (rhs[i] - sum) / M[i][i];
   }
   return x;
 }
 
 function calculatePlate() {
   const out = document.getElementById("output");
+  const dbg = document.getElementById("debug-output");
   out.className = "results";
   out.innerText = "Computing... please wait.";
 
@@ -583,7 +595,8 @@ function calculatePlate() {
 
     if (!isKinematicallyStable(a0, a1, b0, b1)) {
       out.className = "results error-msg";
-      out.innerText = "Error: Plate is kinematically unstable under bending.\nRigid-body motion will occur. Ensure at least 1 clamped edge or sufficient simple supports.";
+      out.innerText = "Error: Plate is kinematically unstable under out-of-plane bending.\nRigid-body motion will occur. Specify at least 1 clamped edge or adequate simple supports.";
+      dbg.innerText = "Calculation aborted due to rigid body instability.";
       return;
     }
 
@@ -606,7 +619,7 @@ function calculatePlate() {
 
     if (L <= 0 || d <= 0 || h <= 0 || E <= 0) {
       out.className = "results error-msg";
-      out.innerText = "Error: Dimensions and material modulus must be strictly positive.";
+      out.innerText = "Error: Plate dimensions, thickness, and elastic modulus must be strictly positive.";
       return;
     }
 
@@ -615,7 +628,6 @@ function calculatePlate() {
     const D = (E * Math.pow(h, 3)) / (12 * (1 - v * v));
     const totalModes = N * N;
 
-    // Basis functions
     const X_modes = [];
     const Y_modes = [];
     for (let m = 0; m < N; m++) {
@@ -644,7 +656,7 @@ function calculatePlate() {
     const F = new Float64Array(totalModes);
     const detA = L * d;
 
-    // Force vector integration
+    // Load Vector Formulation
     for (let r = 0; r < totalModes; r++) {
       const ir = Math.floor(r / N);
       const jr = r % N;
@@ -759,14 +771,16 @@ function calculatePlate() {
     const coefs = solveLinearSystem(K, F);
     if (!coefs) {
       out.className = "results error-msg";
-      out.innerText = "Error: Numerical singularity encountered during matrix inversion. Check boundary constraints.";
+      out.innerText = "Error: Numerical singularity during matrix inversion. Check support constraints.";
+      dbg.innerText = "Singular matrix: determinant is ~0.";
       return;
     }
 
-    // Grid search for maximum deflection and Von Mises stress
+    // Grid Search for Max Field Responses
     const steps = 30;
     let maxW = 0, maxVM = 0;
     let locW = {x: 0, y: 0}, locVM = {x: 0, y: 0};
+    let critMx = 0, critMy = 0, critMxy = 0;
 
     for (let ix = 0; ix <= steps; ix++) {
       const s_x = ix / steps;
@@ -809,16 +823,42 @@ function calculatePlate() {
         if (vm > maxVM) {
           maxVM = vm;
           locVM = {x, y};
+          critMx = Mx;
+          critMy = My;
+          critMxy = Mxy;
         }
       }
     }
 
     out.innerText = 
-      `Plate Rigidity D:       ${D.toExponential(3)} lb·in\n` +
-      `Max Deflection:         ${maxW.toFixed(5)} in  at (x = ${locW.x.toFixed(2)}, y = ${locW.y.toFixed(2)})\n` +
-      `Max Von Mises Stress:   ${maxVM.toFixed(1)} psi  at (x = ${locVM.x.toFixed(2)}, y = ${locVM.y.toFixed(2)})\n\n` +
+      `Plate Rigidity D:       ${D.toExponential(4)} lb·in\n` +
+      `Max Deflection:         ${maxW.toFixed(6)} in   at (x = ${locW.x.toFixed(2)}, y = ${locW.y.toFixed(2)})\n` +
+      `Max Von Mises Stress:   ${maxVM.toFixed(2)} psi  at (x = ${locVM.x.toFixed(2)}, y = ${locVM.y.toFixed(2)})\n\n` +
       `Load Mode:              ${loadType}\n` +
-      `Convergence:            N=${N} modes (${totalModes} series terms).`;
+      `Convergence:            N=${N} modes (${totalModes} total terms).`;
+
+    // Populate Detailed Diagnostic Work
+    let diagText = `=== INTERMEDIATE COMPUTATIONAL WORK ===\n`;
+    diagText += `Flexural Rigidity D = E*h^3 / [12*(1 - v^2)] = ${D.toExponential(4)} lb*in\n`;
+    diagText += `Plate Domain: [0, ${L.toFixed(2)}] x [0, ${d.toFixed(2)}] in, det(J) = ${detA.toFixed(2)} in^2\n`;
+    diagText += `Support Envelope: x=0: ${a0}, x=L: ${a1}, y=0: ${b0}, y=d: ${b1}\n\n`;
+
+    diagText += `--- Generalized Ritz Modal Coefficients (c_ij) ---\n`;
+    for (let r = 0; r < totalModes; r++) {
+      const ir = Math.floor(r / N);
+      const jr = r % N;
+      diagText += `c[${ir + 1},${jr + 1}] = ${coefs[r] >= 0 ? " " : ""}${coefs[r].toExponential(4)}   |   F[${ir + 1},${jr + 1}] = ${F[r] >= 0 ? " " : ""}${F[r].toExponential(4)}\n`;
+    }
+
+    diagText += `\n--- Critical Section Resultants at Peak Stress Point (${locVM.x.toFixed(2)}, ${locVM.y.toFixed(2)}) ---\n`;
+    diagText += `Mx  = ${critMx.toFixed(4)} lb*in/in\n`;
+    diagText += `My  = ${critMy.toFixed(4)} lb*in/in\n`;
+    diagText += `Mxy = ${critMxy.toFixed(4)} lb*in/in\n`;
+    diagText += `Extreme Fiber Stress (Sigma_x) = ${(6 * Math.abs(critMx) / (h * h)).toFixed(2)} psi\n`;
+    diagText += `Extreme Fiber Stress (Sigma_y) = ${(6 * Math.abs(critMy) / (h * h)).toFixed(2)} psi\n`;
+    diagText += `Torsional Shear Stress (Tau_xy) = ${(6 * Math.abs(critMxy) / (h * h)).toFixed(2)} psi\n`;
+
+    dbg.innerText = diagText;
 
   } catch (err) {
     out.className = "results error-msg";
@@ -826,8 +866,18 @@ function calculatePlate() {
   }
 }
 
-// Initial UI setup
+// Attach listeners to reset calculation state on input edits
+document.querySelectorAll("input, select").forEach(el => {
+  el.addEventListener("input", () => {
+    updateSVGPositions();
+    const out = document.getElementById("output");
+    out.className = "results";
+    out.innerText = 'Parameters modified. Press "CALCULATE" to evaluate.';
+  });
+});
+
 updateLoadUI();
 </script>
 </body>
 </html>
+
