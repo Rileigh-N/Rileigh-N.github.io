@@ -96,6 +96,8 @@
       text-align: right;
       outline: none;
       transition: border-color 0.15s ease;
+      -moz-appearance: textfield;  /* Hide spinners in Firefox */
+      appearance: textfield;       /* Standard property */
     }
     input[type="number"]:focus, select:focus {
       border-color: var(--border-focus);
@@ -162,8 +164,7 @@
     <rect id="svg-patch" x="180" y="70" width="40" height="40" fill="#f59e0b" opacity="0.45" stroke="#f59e0b" stroke-width="1.5" style="display:none;"/>
     <circle id="svg-point" cx="200" cy="90" r="5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5" style="display:none;"/>
   </svg>
-
-  <div class="grid">
+<div class="grid">
     <!-- Boundary Conditions -->
     <div class="panel">
       <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #f0fdf4;">Boundary Conditions</h3>
@@ -206,7 +207,7 @@
 
       <div class="input-row" style="margin-top: 0.8rem;">
         <label>Terms per Axis (N):</label>
-        <input type="number" id="num_modes" value="5" min="2" max="6">
+        <input type="number" id="num_modes" value="5" min="2" max="6" step="1">
       </div>
     </div>
 
@@ -216,23 +217,23 @@
       
       <div class="input-row">
         <label>Length L (in):</label>
-        <input type="value" id="len" value="20" min="0.1" oninput="updateSVGPositions()">
+        <input type="number" id="len" value="20" min="0.1" step="any" oninput="updateSVGPositions()">
       </div>
       <div class="input-row">
         <label>Width d (in):</label>
-        <input type="value" id="wid" value="10" min="0.1" oninput="updateSVGPositions()">
+        <input type="number" id="wid" value="10" min="0.1" step="any" oninput="updateSVGPositions()">
       </div>
       <div class="input-row">
         <label>Thickness h (in):</label>
-        <input type="value" id="thk" value="0.25" min="0.001">
+        <input type="number" id="thk" value="0.25" min="0.001" step="any">
       </div>
       <div class="input-row">
         <label>Young's Modulus E (psi):</label>
-        <input type="value" id="mod_e" value="29000000">
+        <input type="number" id="mod_e" value="29000000" step="any">
       </div>
       <div class="input-row">
         <label>Poisson's Ratio ν:</label>
-        <input type="value" id="poi_v" value="0.3" min="0.01" max="0.49">
+        <input type="number" id="poi_v" value="0.3" min="0.01" max="0.49" step="0.01">
       </div>
 
       <div class="input-row" style="margin-top: 0.6rem;">
@@ -249,30 +250,30 @@
       <!-- Magnitude Field -->
       <div class="input-row" id="row_q0">
         <label id="lbl_q0">Pressure q (psi):</label>
-        <input type="value" id="load_q0" value="5">
+        <input type="number" id="load_q0" value="5" step="any">
       </div>
 
       <!-- Secondary Magnitude Field (for Trapezoid/Triangle) -->
       <div class="input-row" id="row_q1" style="display: none;">
         <label id="lbl_q1">End Pressure q1 (at edge, psi):</label>
-        <input type="value" id="load_q1" value="0">
+        <input type="number" id="load_q1" value="0" step="any">
       </div>
 
       <!-- Patch Dimensions (u x v) -->
       <div class="input-row" id="row_patch_dim" style="display: none;">
         <label>Patch Size u × v (in):</label>
         <div style="display: flex; gap: 4px;">
-          <input type="value" id="patch_u" value="4" style="width: 50px;" oninput="updateSVGPositions()">
-          <input type="value" id="patch_v" value="4" style="width: 50px;" oninput="updateSVGPositions()">
+          <input type="number" id="patch_u" value="4" style="width: 50px;" step="any" oninput="updateSVGPositions()">
+          <input type="number" id="patch_v" value="4" style="width: 50px;" step="any" oninput="updateSVGPositions()">
         </div>
       </div>
 
       <!-- Center Coordinates (x0, y0) for Patch or Point -->
       <div class="input-row" id="row_coords" style="display: none;">
-        <label id="lbl_coords">Load Location (x ft, y in):</label>
+        <label id="lbl_coords">Load Location (x in, y in):</label>
         <div style="display: flex; gap: 4px;">
-          <input type="value" id="coord_x" value="10" style="width: 50px;" oninput="updateSVGPositions()">
-          <input type="value" id="coord_y" value="5" style="width: 50px;" oninput="updateSVGPositions()">
+          <input type="number" id="coord_x" value="10" style="width: 50px;" step="any" oninput="updateSVGPositions()">
+          <input type="number" id="coord_y" value="5" style="width: 50px;" step="any" oninput="updateSVGPositions()">
         </div>
       </div>
 
@@ -281,7 +282,8 @@
   </div>
 
   <div class="results" id="output">Make sure to double check your inputs and units, then press "CALCULATE"</div>
-    <details id="details-panel" style="margin-top: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;">
+  
+  <details id="details-panel" style="margin-top: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;">
     <summary style="cursor: pointer; font-weight: 600; color: var(--accent); font-size: 0.9rem;">
       Show Detailed Formulation and Intermediate Work
     </summary>
@@ -290,7 +292,7 @@
     </div>
   </details>
 </div>
-
+ 
 <script>
 function updateSVGPositions() {
   const L = parseFloat(document.getElementById("len").value) || 20;
