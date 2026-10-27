@@ -7,4 +7,4 @@ title: Projects
 # My Projects
 
 Here is a list of things I have built:
-* [Plate Deflection and Stress Calculator](./PlateCalc/)
+* [Thin Plate Deflection and Stress Calculator](./PlateCalc/)
