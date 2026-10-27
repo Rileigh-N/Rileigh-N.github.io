@@ -5,18 +5,18 @@
   <title>Plate Deflection & Stress Calculator</title>
   <style>
     :root {
-      --bg: #061913;                 /* Deep pine background */
-      --card: #0b2920;               /* Dark emerald card container */
-      --card-inner: #08211a;         /* Inset fieldset / panel background */
-      --border: #1b4d3e;             /* Subtle forest green border */
-      --border-focus: #10b981;       /* Vibrant emerald outline */
-      --accent: #10b981;             /* Mint / emerald green action */
-      --accent-hover: #059669;       /* Darker emerald hover */
-      --accent-text: #022216;        /* High-contrast dark text on green button */
-      --text: #ecfdf5;               /* Crisp mint-white text */
-      --text-muted: #6ee7b7;         /* Soft sage green muted labels */
-      --input-bg: #04140f;           /* Dark slate-green input fields */
-      --code-bg: #03120d;            /* Terminal-style deep green background */
+      --bg: #061913;                 /* background */
+      --card: #0b2920;               /* card container */
+      --card-inner: #08211a;         /* inset fieldset / panel background */
+      --border: #1b4d3e;             /* border */
+      --border-focus: #10b981;       /* outline */
+      --accent: #10b981;             /* action */
+      --accent-hover: #059669;       /* hover */
+      --accent-text: #022216;        /* high-contrast dark text */
+      --text: #ecfdf5;               /* text */
+      --text-muted: #6ee7b7;         /* muted labels */
+      --input-bg: #04140f;           /* input fields */
+      --code-bg: #03120d;            /* terminal-style background */
     } 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -147,7 +147,8 @@
 
 <div class="container">
   <h1>Plate Deflection &amp; Stress Calculator</h1>
-  <p class="sub">Kirchhoff-Love Theory &amp; Rayleigh-Ritz Formulation with Admissible Beam Functions</p>
+  <p class="sub">Built Using Kirchhoff-Love Theory and Rayleigh-Ritz Formulation with Admissible Beam Functions</p>
+  <p class="sub">Assumes Isotropic and Linearly Elastic Behavior</p>
 
   <!-- Interactive Visualizer -->
   <svg id="plate-svg" viewBox="0 0 400 180">
@@ -205,41 +206,41 @@
 
       <div class="input-row" style="margin-top: 0.8rem;">
         <label>Terms per Axis (N):</label>
-        <input type="number" id="num_modes" value="5" min="2" max="6" step="1">
+        <input type="number" id="num_modes" value="5" min="2" max="6">
       </div>
     </div>
 
     <!-- Dimensions & Loading -->
     <div class="panel">
-      <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #f0fdf4;">Plate Dimensions &amp; Loading Conditions</h3>
+      <h3 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #f0fdf4;">Plate Dimensions and Loading Conditions</h3>
       
       <div class="input-row">
         <label>Length L (in):</label>
-        <input type="number" id="len" value="20" min="0.1" step="any" oninput="updateSVGPositions()">
+        <input type="value" id="len" value="20" min="0.1" oninput="updateSVGPositions()">
       </div>
       <div class="input-row">
         <label>Width d (in):</label>
-        <input type="number" id="wid" value="10" min="0.1" step="any" oninput="updateSVGPositions()">
+        <input type="value" id="wid" value="10" min="0.1" oninput="updateSVGPositions()">
       </div>
       <div class="input-row">
         <label>Thickness h (in):</label>
-        <input type="number" id="thk" value="0.25" min="0.001" step="any">
+        <input type="value" id="thk" value="0.25" min="0.001">
       </div>
       <div class="input-row">
         <label>Young's Modulus E (psi):</label>
-        <input type="number" id="mod_e" value="29000000" step="any">
+        <input type="value" id="mod_e" value="29000000">
       </div>
       <div class="input-row">
         <label>Poisson's Ratio ν:</label>
-        <input type="number" id="poi_v" value="0.3" min="0.01" max="0.49" step="0.01">
+        <input type="value" id="poi_v" value="0.3" min="0.01" max="0.49">
       </div>
 
       <div class="input-row" style="margin-top: 0.6rem;">
         <label>Load Type:</label>
         <select id="load_type" onchange="updateLoadUI()">
           <option value="UDL">Full Uniform (UDL)</option>
-          <option value="TRAP_X">Trapezoidal / Triangular (along x)</option>
-          <option value="TRAP_Y">Trapezoidal / Triangular (along y)</option>
+          <option value="TRAP_X">Trapezoidal / Triangular (along L)</option>
+          <option value="TRAP_Y">Trapezoidal / Triangular (along d)</option>
           <option value="PATCH">Partial Area (Patch)</option>
           <option value="POINT">Point Load</option>
         </select>
@@ -248,38 +249,46 @@
       <!-- Magnitude Field -->
       <div class="input-row" id="row_q0">
         <label id="lbl_q0">Pressure q (psi):</label>
-        <input type="number" id="load_q0" value="5" step="any">
+        <input type="value" id="load_q0" value="5">
       </div>
 
       <!-- Secondary Magnitude Field (for Trapezoid/Triangle) -->
       <div class="input-row" id="row_q1" style="display: none;">
         <label id="lbl_q1">End Pressure q1 (at edge, psi):</label>
-        <input type="number" id="load_q1" value="0" step="any">
+        <input type="value" id="load_q1" value="0">
       </div>
 
       <!-- Patch Dimensions (u x v) -->
       <div class="input-row" id="row_patch_dim" style="display: none;">
         <label>Patch Size u × v (in):</label>
         <div style="display: flex; gap: 4px;">
-          <input type="number" id="patch_u" value="4" style="width: 50px;" step="any" oninput="updateSVGPositions()">
-          <input type="number" id="patch_v" value="4" style="width: 50px;" step="any" oninput="updateSVGPositions()">
+          <input type="value" id="patch_u" value="4" style="width: 50px;" oninput="updateSVGPositions()">
+          <input type="value" id="patch_v" value="4" style="width: 50px;" oninput="updateSVGPositions()">
         </div>
       </div>
 
       <!-- Center Coordinates (x0, y0) for Patch or Point -->
       <div class="input-row" id="row_coords" style="display: none;">
-        <label id="lbl_coords">Load Location (x, y in):</label>
+        <label id="lbl_coords">Load Location (x ft, y in):</label>
         <div style="display: flex; gap: 4px;">
-          <input type="number" id="coord_x" value="10" style="width: 50px;" step="any" oninput="updateSVGPositions()">
-          <input type="number" id="coord_y" value="5" style="width: 50px;" step="any" oninput="updateSVGPositions()">
+          <input type="value" id="coord_x" value="10" style="width: 50px;" oninput="updateSVGPositions()">
+          <input type="value" id="coord_y" value="5" style="width: 50px;" oninput="updateSVGPositions()">
         </div>
       </div>
 
-      <button id="calc-btn" onclick="calculatePlate()">Calculate</button>
+      <button id="calc-btn" onclick="calculatePlate()">CALCULATE</button>
     </div>
   </div>
 
-  <div class="results" id="output">Ready. Click "Calculate" to begin.</div>
+  <div class="results" id="output">Make sure to double check your inputs and units, then press "CALCULATE"</div>
+  <details id="details-panel" style="margin-top: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;">
+  <summary style="cursor: pointer; font-weight: 600; color: var(--accent); font-size: 0.9rem;">
+    Show Detailed Formulation &amp; Intermediate Work
+  </summary>
+  <div id="debug-output" style="margin-top: 0.75rem; font-family: ui-monospace, monospace; font-size: 0.8rem; white-space: pre-wrap; color: #cbd5e1; max-height: 420px; overflow-y: auto; background: var(--code-bg); padding: 0.75rem; border-radius: 4px; border: 1px solid var(--border);">
+    Run a calculation to view intermediate matrices, modal load vectors, and stress components.
+  </div>
+</details>
 </div>
 
 <script>
@@ -292,9 +301,9 @@ function updateSVGPositions() {
   const patchU = parseFloat(document.getElementById("patch_u")?.value || 0);
   const patchV = parseFloat(document.getElementById("patch_v")?.value || 0);
 
-  const pW = 240, pH = 130, pX = 80, pY = 25;
+  const pW = 240, pH = 130, pX = 80, pY = 25; /*establishes boundaries for plate visualization to ensure visual remains logical*/
 
-  if (type === "POINT") {
+  if (type === "POINT") { /*establishes center point and relative location of the popint load to the rest of the plate*/
     const cx = pX + Math.min(1.0, Math.max(0.0, coordX / L)) * pW;
     const cy = pY + (1.0 - Math.min(1.0, Math.max(0.0, coordY / d))) * pH;
     const pt = document.getElementById("svg-point");
@@ -345,12 +354,12 @@ function updateLoadUI() {
     lblQ0.innerText = "Patch Pressure q (psi):";
     rowPatchDim.style.display = "flex";
     rowCoords.style.display = "flex";
-    lblCoords.innerText = "Patch Center (x, y in):";
+    lblCoords.innerText = "Patch Center (x ft, y in):";
     svgPatch.style.display = "block";
   } else if (type === "POINT") {
     lblQ0.innerText = "Point Load P (lbf):";
     rowCoords.style.display = "flex";
-    lblCoords.innerText = "Point Location (x, y in):";
+    lblCoords.innerText = "Point Location (x ft, y in):";
     svgPoint.style.display = "block";
   }
   updateSVGPositions();
