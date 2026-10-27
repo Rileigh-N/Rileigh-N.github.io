@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <!-- setting up color scheme, and visualization of plate -->
-  <!-- visualizationcentered and has width constraint -->
-  <title>Plate Maximum Deflection and Stress Calculator</title>
+  <!-- visualization centered and has width constraint -->
+  <title>Plate Deflection & Stress Calculator</title>
   <style>
     :root {
-      --bg: #ffaaa5;
+      --bg: #647400;
       --card: #fcf8f3;
       --border: #ffd3b6;
       --accent: #0284c7;
       --accent-hover: #0369a1;
-      --text: #1e293b;
+      --text: #647400;
       --text-muted: #64748b;
     } 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -118,7 +118,7 @@
 
 <div class="container">
   <h1>Plate Deflection & Stress Calculator</h1>
-  <p class="sub">Rayleigh-Ritz Formulation</p>
+  <p class="sub">Based on Kirchoff-Love Plate Hypothesis and Rayleigh-Ritz Formulation</p>
 
   <!-- Interactive Visualizer -->
   <svg id="plate-svg" viewBox="0 0 400 180">
